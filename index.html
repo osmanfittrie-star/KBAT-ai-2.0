@@ -1,0 +1,2139 @@
+<!DOCTYPE html>
+<html lang="ms" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>PintarKBAT AI v3.2 - Penyelesai & Bedah Siasat Markah KBAT (Semua Peranti)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(12px);
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+            .print-box { border: 1px solid #cbd5e1 !important; box-shadow: none !important; }
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 left-4 sm:left-auto z-50 transform transition-all duration-300 translate-y-24 opacity-0 pointer-events-none no-print">
+        <div class="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-slate-700 max-w-md ml-auto">
+            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400 shrink-0" id="toast-icon"></i>
+            <span id="toast-message" class="text-xs sm:text-sm font-medium leading-snug">Berjaya!</span>
+        </div>
+    </div>
+
+    <!-- Modal Tetapan Enjin / API (Pilihan untuk GitHub Pages / Peranti Luar) -->
+    <div id="settings-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center">
+                        <i data-lucide="cpu" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-display font-bold text-slate-900 text-base">Tetapan Enjin PintarKBAT</h3>
+                        <p class="text-xs text-slate-500">Berfungsi 100% di semua telefon, tablet & komputer</p>
+                    </div>
+                </div>
+                <button onclick="toggleSettingsModal(false)" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 text-xs text-emerald-950 space-y-1">
+                <div class="font-bold flex items-center gap-1.5 text-emerald-800">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+                    Status Semasa: Enjin Hibrid Aktif (Anti-Ralat)
+                </div>
+                <p class="leading-relaxed">
+                    Aplikasi ini dilengkapi <strong>Enjin Analisis Linguistik KBAT Terbina</strong>. Anda <strong>tidak wajib</strong> memasukkan sebarang kunci API untuk menyemak jawapan, menyelesaikan soalan, atau menjana soalan di mana-mana peranti!
+                </p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+                    Kunci Gemini API Tambahan (Pilihan / Tidak Wajib)
+                </label>
+                <input type="password" id="custom-api-key" placeholder="Biarkan kosong untuk guna Enjin Terbina..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <p class="text-[11px] text-slate-500 mt-1.5">
+                    Jika anda membuka fail ini di GitHub Pages dan mahu sambungan Cloud Gemini tambahan, anda boleh masukkan Gemini API Key di sini. Jika dibiarkan kosong, sistem akan menggunakan Enjin Pintar Terbina secara automatik tanpa sebarang ralat.
+                </p>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button onclick="clearCustomApiKey()" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+                    Guna Enjin Terbina Sahaja
+                </button>
+                <button onclick="saveCustomApiKey()" class="px-4 py-2 rounded-xl text-xs font-display font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition">
+                    Simpan Tetapan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header / Navbar -->
+    <header class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white border-b border-indigo-800/40 sticky top-0 z-30 shadow-md no-print">
+        <div class="max-w-6xl mx-auto px-3 sm:px-6 py-3.5 flex flex-col lg:flex-row items-center justify-between gap-3">
+            <div class="flex items-center justify-between w-full lg:w-auto gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-amber-500 p-0.5 shadow-lg shrink-0">
+                        <div class="w-full h-full bg-slate-900 rounded-[10px] flex items-center justify-center">
+                            <i data-lucide="award" class="w-5 h-5 sm:w-6 sm:h-6 text-amber-400"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h1 class="font-display font-extrabold text-lg sm:text-2xl tracking-tight bg-gradient-to-r from-white via-indigo-200 to-amber-200 bg-clip-text text-transparent">
+                                PintarKBAT AI <span class="text-amber-400 text-sm sm:text-base font-bold">v3.2</span>
+                            </h1>
+                            <span class="bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[10px] sm:text-[11px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                Auto-Kesan Konteks & Sudut Hujah
+                            </span>
+                        </div>
+                        <p class="text-[11px] sm:text-xs text-slate-300 hidden sm:block">Penyelesai & Bedah Siasat Markah KBAT (4M Struktur & 8M Esei: 3F+3H+3C + Inferens Sokongan)</p>
+                    </div>
+                </div>
+
+                <!-- Settings Button Mobile/Desktop -->
+                <button onclick="toggleSettingsModal(true)" class="lg:hidden bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-2.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shrink-0">
+                    <i data-lucide="settings" class="w-4 h-4 text-amber-400"></i>
+                    <span>Enjin</span>
+                </button>
+            </div>
+
+            <!-- Formula & Flexible Scoring Legend -->
+            <div class="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 bg-slate-800/90 border border-slate-700/80 px-3 py-1.5 rounded-xl text-[11px] sm:text-xs w-full lg:w-auto">
+                <span class="text-slate-300 font-semibold">Skema:</span>
+                <span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-bold border border-blue-500/30">F (Fakta)</span>
+                <span class="text-slate-500">+</span>
+                <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold border border-purple-500/30">H (Huraian)</span>
+                <span class="text-slate-500">+</span>
+                <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">C (Contoh)</span>
+                <span class="text-slate-500">|</span>
+                <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">
+                    I (Inferens: Sokongan)
+                </span>
+                <button onclick="toggleSettingsModal(true)" class="hidden lg:inline-flex items-center gap-1 ml-2 pl-2 border-l border-slate-700 text-slate-300 hover:text-white transition" title="Tetapan Enjin">
+                    <i data-lucide="settings" class="w-3.5 h-3.5 text-amber-400"></i>
+                    <span>Enjin</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-6xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6 flex-1">
+
+        <!-- Info Banner tentang Skema Fleksibel 4M vs 8M -->
+        <div class="mb-5 bg-gradient-to-r from-indigo-50 via-white to-emerald-50 border border-indigo-200/80 rounded-2xl p-3.5 sm:p-4 shadow-sm no-print">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs sm:text-sm">
+                <div class="flex items-start gap-2.5">
+                    <span class="px-2 py-1 rounded-lg bg-indigo-600 text-white font-display font-bold text-[11px] shrink-0 mt-0.5">4 Markah</span>
+                    <div>
+                        <strong class="text-slate-900">Soalan Struktur (1 Set Isi Padat):</strong>
+                        <p class="text-slate-600 text-xs mt-0.5 leading-relaxed">
+                            Sasaran 4 poin bernas. <strong>Inferens tidak wajib</strong> jika sudah cukup 4 poin melalui <code class="bg-slate-200 px-1 rounded font-semibold">1F + 2H + 1C</code> atau <code class="bg-slate-200 px-1 rounded font-semibold">2F + 2H</code>. Namun <code class="bg-emerald-100 text-emerald-800 px-1 rounded font-semibold">1F + 1H + 1C + 1I</code> sangat digalakkan sebagai insurans markah.
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-2.5 md:border-l md:border-slate-200 md:pl-4">
+                    <span class="px-2 py-1 rounded-lg bg-amber-500 text-slate-950 font-display font-bold text-[11px] shrink-0 mt-0.5">8 Markah</span>
+                    <div>
+                        <strong class="text-slate-900">Soalan Esei (Kerangka Insurans 3F + 3H + 3C + [3I]):</strong>
+                        <p class="text-slate-600 text-xs mt-0.5 leading-relaxed">
+                            Membekalkan <strong>3 Set Isi (3 Fakta, 3 Huraian, 3 Contoh)</strong> menghasilkan 9 poin (melepasi 8 markah!). Tambahan <strong>3 Inferens Sokongan</strong> memastikan jawapan mencapai Aras 4 (7–8M).
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mode Navigation Tabs -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-slate-200/80 p-1.5 rounded-2xl mb-5 border border-slate-300/60 no-print">
+            <button onclick="switchTab('solver')" id="tab-solver" class="tab-btn flex items-center justify-center gap-2 py-3 px-3 rounded-xl font-display font-bold text-xs sm:text-sm transition-all duration-200 text-slate-600 hover:text-slate-900 hover:bg-white/50">
+                <i data-lucide="wand-2" class="w-4 h-4 text-indigo-600 shrink-0"></i>
+                <span>1. AI Penyelesai (4M & 8M)</span>
+            </button>
+            <button onclick="switchTab('grader')" id="tab-grader" class="tab-btn flex items-center justify-center gap-2 py-3 px-3 rounded-xl font-display font-bold text-xs sm:text-sm transition-all duration-200 bg-white text-indigo-950 shadow-sm">
+                <i data-lucide="microscope" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+                <span>2. Semak & Sebab Dapat Markah</span>
+            </button>
+            <button onclick="switchTab('generator')" id="tab-generator" class="tab-btn flex items-center justify-center gap-2 py-3 px-3 rounded-xl font-display font-bold text-xs sm:text-sm transition-all duration-200 text-slate-600 hover:text-slate-900 hover:bg-white/50">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4 text-amber-600 shrink-0"></i>
+                <span>3. Penjana Soalan & Skema</span>
+            </button>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- MOD 1: AI PENYELESAI SOALAN KBAT (4M & 8M 3F+3H+3C+3I)    -->
+        <!-- ========================================================= -->
+        <section id="panel-solver" class="hidden space-y-6">
+            <div class="glass-card rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-6">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100">
+                    <div>
+                        <h2 class="text-base sm:text-lg font-display font-bold text-slate-900 flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 inline-flex items-center justify-center text-sm shrink-0">1</span>
+                            Jana Jawapan KBAT Berstruktur & Penerangan Markah
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Pilih skala <strong>4 Markah (1 Set)</strong> atau <strong>8 Markah (3 Set: 3F, 3H, 3C + 3I Sokongan)</strong>.</p>
+                    </div>
+
+                    <!-- Sample Question Pills -->
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span class="text-xs font-medium text-slate-400 mr-1">Contoh Pantas:</span>
+                        <button onclick="fillSampleSolver('sejarah4')" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold px-2.5 py-1.5 rounded-lg border border-indigo-200 transition">
+                            🏛️ Sejarah (4M)
+                        </button>
+                        <button onclick="fillSampleSolver('sejarah8')" class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-900 font-semibold px-2.5 py-1.5 rounded-lg border border-amber-200 transition">
+                            📜 Sejarah Esei (8M - 3 Set)
+                        </button>
+                        <button onclick="fillSampleSolver('moral')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-2.5 py-1.5 rounded-lg border border-slate-200 transition">
+                            🤝 Moral / BM
+                        </button>
+                        <button onclick="fillSampleSolver('sains')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-2.5 py-1.5 rounded-lg border border-slate-200 transition">
+                            🔬 Sains
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Configuration Row -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 mb-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Pilihan Peruntukan Markah</label>
+                        <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                            <button type="button" onclick="setSolverMarks(4)" id="solver-btn-4m" class="py-2 px-2.5 rounded-lg font-display font-bold text-xs transition bg-indigo-600 text-white shadow-sm">
+                                4 Markah (1 Set)
+                            </button>
+                            <button type="button" onclick="setSolverMarks(8)" id="solver-btn-8m" class="py-2 px-2.5 rounded-lg font-display font-bold text-xs transition text-slate-600 hover:text-slate-900">
+                                8 Markah (3 Set)
+                            </button>
+                        </div>
+                        <input type="hidden" id="solver-marks" value="4">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Subjek Peperiksaan</label>
+                        <select id="solver-subject" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+                            <option value="Sejarah">Sejarah (KSSM UASA & SPM)</option>
+                            <option value="Bahasa Melayu">Bahasa Melayu</option>
+                            <option value="Pendidikan Islam / Moral">Pendidikan Islam / Moral</option>
+                            <option value="Sains / STEM">Sains & STEM</option>
+                            <option value="Geografi / Ekonomi / Perniagaan">Geografi / Ekonomi / Perniagaan</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Fokus Perspektif Hujah</label>
+                        <select id="solver-focus" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+                            <option value="Diri, Masyarakat & Negara">Pelbagai Sudut (Diri, Masyarakat & Negara)</option>
+                            <option value="Peranan Generasi Muda / Pelajar">Fokus Generasi Muda / Pelajar</option>
+                            <option value="Peranan Kerajaan, Undang-undang & Kempen">Fokus Kerajaan, Dasar & Penguatkuasaan</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Question Input -->
+                <div class="mb-4">
+                    <label for="solver-question" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Soalan / Pernyataan Masalah KBAT</label>
+                    <textarea id="solver-question" rows="3" placeholder="Taip atau tampal soalan KBAT anda di sini... Contoh: Bagaimanakah generasi muda hari ini dapat mempertahankan kedaulatan negara daripada ancaman penjajahan bentuk baharu?" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-sm sm:text-base text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition"></textarea>
+                </div>
+
+                <!-- Action Bar -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                    <div id="solver-mode-indicator" class="text-xs text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-2 rounded-xl font-medium flex items-center gap-1.5">
+                        <i data-lucide="info" class="w-4 h-4 shrink-0"></i>
+                        <span>Mod Semasa: <strong>4 Markah</strong> — Menjana 1 Set Isi (F+H+C) + Inferens Sokongan beserta sebab dapat markah.</span>
+                    </div>
+                    <button onclick="solveKBATWithAI()" id="btn-solve" class="w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-display font-bold text-sm px-6 py-3.5 rounded-xl shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 shrink-0">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i>
+                        <span>Selesaikan & Tunjuk Sebab Markah</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading State Solver -->
+            <div id="solver-loading" class="hidden glass-card rounded-2xl border border-indigo-100 p-8 text-center">
+                <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center mx-auto mb-3 animate-spin">
+                    <i data-lucide="loader-2" class="w-6 h-6"></i>
+                </div>
+                <h3 class="font-display font-bold text-slate-800 text-base">Menyusun Kerangka Jawapan & Justifikasi Markah...</h3>
+                <p class="text-xs text-slate-500 mt-1">Membina Fakta, Huraian, Contoh, dan Inferens Sokongan berserta ulasan sebab setiap ayat diberi markah.</p>
+            </div>
+
+            <!-- Results Container Solver -->
+            <div id="solver-result" class="hidden space-y-6">
+                <div class="bg-indigo-950 text-white rounded-2xl p-4 sm:p-5 shadow-md border border-indigo-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="space-y-1.5">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-amber-400 text-slate-950" id="res-kata-tugas">Kata Tugas</span>
+                            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-800 text-indigo-200 border border-indigo-600" id="res-kehendak">Kehendak Soalan</span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-200 pt-0.5 leading-relaxed" id="res-strategi"></p>
+                    </div>
+                    <button onclick="sendToGraderFromSolver()" class="shrink-0 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-display font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow">
+                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                        <span>Cuba Tulis Sendiri di Penyemak</span>
+                    </button>
+                </div>
+
+                <!-- Structured FHCI Breakdown Sets -->
+                <div id="fhci-sets-container" class="space-y-5"></div>
+
+                <!-- Complete Cohesive Paragraph Box + Scoring Explanation -->
+                <div class="glass-card rounded-2xl border-2 border-emerald-500/80 shadow-md overflow-hidden">
+                    <div class="bg-emerald-50/90 border-b border-emerald-200 px-4 sm:px-5 py-3.5 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                                <i data-lucide="award" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-display font-bold text-emerald-950 text-sm sm:text-base">Perenggan Esei Lengkap (Berserta Penanda Markah)</h3>
+                                <p class="text-[11px] text-emerald-700">Gabungan penuh sedia peperiksaan dengan label [F], [H], [C], dan [I - Sokongan]</p>
+                            </div>
+                        </div>
+                        <button onclick="copyElementText('res-full-essay')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                            <span>Salin Jawapan</span>
+                        </button>
+                    </div>
+                    <div class="p-4 sm:p-6 bg-white space-y-4">
+                        <p id="res-full-essay" class="text-slate-800 text-sm sm:text-base leading-relaxed whitespace-pre-line font-normal bg-slate-50 p-4 rounded-xl border border-slate-200"></p>
+                        
+                        <div class="bg-amber-50/80 border border-amber-200 rounded-xl p-4">
+                            <h4 class="text-xs font-extrabold uppercase tracking-wider text-amber-900 flex items-center gap-1.5 mb-1.5">
+                                <i data-lucide="check-circle" class="w-4 h-4 text-amber-600 shrink-0"></i>
+                                Mengapa Jawapan Ini Layak Mendapat Markah Penuh?
+                            </h4>
+                            <p id="res-mengapa-markah-penuh" class="text-xs sm:text-sm text-amber-950 leading-relaxed"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- MOD 2: AI PENYEMAK JAWAPAN & SEBAB DAPAT MARKAH (GRADER)  -->
+        <!-- ========================================================= -->
+        <section id="panel-grader" class="space-y-6">
+            <div class="glass-card rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-6">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100">
+                    <div>
+                        <h2 class="text-base sm:text-lg font-display font-bold text-slate-900 flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 inline-flex items-center justify-center text-sm shrink-0">2</span>
+                            Penyemak Jawapan Pintar (Boleh Semak TANPA Soalan!)
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Biarkan ruangan soalan kosong jika mahu sistem mengesan topik secara automatik dan membedah jawapan anda <strong>ayat demi ayat</strong>.</p>
+                    </div>
+
+                    <!-- Quick Test Samples for Grader -->
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span class="text-xs font-medium text-slate-400 mr-1">Uji Pantas:</span>
+                        <button onclick="fillSampleGrader('kesAyatRapat')" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-2.5 py-1.5 rounded-lg transition shadow-sm">
+                            🛡️ Uji Ayat Rapat/Tanpa Jarak (Kes Sebenar 6/8M)
+                        </button>
+                        <button onclick="fillSampleGrader('tanpaSoalan')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold px-2.5 py-1.5 rounded-lg transition shadow-sm">
+                            🚀 Semak TANPA Soalan
+                        </button>
+                        <button onclick="fillSampleGrader('tanpaInferens4m')" class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 font-semibold px-2.5 py-1.5 rounded-lg transition">
+                            🎯 4/4 Tanpa Inferens (1F+2H+1C)
+                        </button>
+                        <button onclick="fillSampleGrader('sederhana4m')" class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-semibold px-2.5 py-1.5 rounded-lg transition">
+                            ⚡ Jawapan Lemah (4M)
+                        </button>
+                        <button onclick="fillSampleGrader('esei8m')" class="text-xs bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 font-semibold px-2.5 py-1.5 rounded-lg transition">
+                            🏆 Esei 8M (3 Set)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Question & Marks Selector -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+                    <div class="lg:col-span-2">
+                        <div class="flex flex-wrap items-center justify-between gap-1 mb-1.5">
+                            <label for="grader-question" class="block text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                Soalan KBAT <span class="text-emerald-600 font-bold">(Pilihan / Tidak Wajib)</span>
+                            </label>
+                            <span class="text-[11px] bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.5 rounded-md font-medium">
+                                ✨ Biarkan kosong untuk auto-kesan topik
+                            </span>
+                        </div>
+                        <input type="text" id="grader-question" placeholder="Pilihan: Biarkan kosong untuk semak terus jawapan, atau taip soalan jika ada..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Skala Markah Soalan</label>
+                        <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                            <button type="button" onclick="setGraderMarks(4)" id="grader-btn-4m" class="py-2 px-2.5 rounded-lg font-display font-bold text-xs transition bg-emerald-600 text-white shadow-sm">
+                                4 Markah (Struktur)
+                            </button>
+                            <button type="button" onclick="setGraderMarks(8)" id="grader-btn-8m" class="py-2 px-2.5 rounded-lg font-display font-bold text-xs transition text-slate-600 hover:text-slate-900">
+                                8 Markah (Esei 3 Set)
+                            </button>
+                        </div>
+                        <input type="hidden" id="grader-marks" value="4">
+                    </div>
+                </div>
+
+                <!-- Discourse Marker Helper Chips -->
+                <div class="mb-3">
+                    <span class="block text-xs font-semibold text-slate-500 mb-1.5">Bantuan Penanda Wacana (Klik untuk masukkan ke dalam kotak jawapan):</span>
+                    <div class="flex flex-wrap gap-1.5">
+                        <button type="button" onclick="insertDiscourse('Antara langkah utama ialah ')" class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-2.5 py-1.5 rounded-lg transition font-medium">
+                            [F1] Antara langkah utama ialah...
+                        </button>
+                        <button type="button" onclick="insertDiscourse('Selain itu, pihak berkenaan perlulah ')" class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-2.5 py-1.5 rounded-lg transition font-medium">
+                            [F2/F3] Selain itu, pihak berkenaan perlulah...
+                        </button>
+                        <button type="button" onclick="insertDiscourse('Hal ini dikatakan demikian kerana ')" class="text-xs bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-2.5 py-1.5 rounded-lg transition font-medium">
+                            [H] Hal ini dikatakan demikian kerana...
+                        </button>
+                        <button type="button" onclick="insertDiscourse('Langkah ini bertujuan untuk ')" class="text-xs bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-2.5 py-1.5 rounded-lg transition font-medium">
+                            [H] Langkah ini bertujuan untuk...
+                        </button>
+                        <button type="button" onclick="insertDiscourse('Sebagai contoh, ')" class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 px-2.5 py-1.5 rounded-lg transition font-medium">
+                            [C] Sebagai contoh,...
+                        </button>
+                        <button type="button" onclick="insertDiscourse('Kesannya, hal ini mampu menjamin ')" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-2.5 py-1.5 rounded-lg transition font-medium">
+                            [I - Sokongan] Kesannya, hal ini mampu...
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Student Draft Answer Input -->
+                <div class="mb-4">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label for="grader-answer" class="block text-xs font-semibold uppercase tracking-wider text-slate-500">Jawapan Draf Pelajar</label>
+                        <button type="button" onclick="clearGraderInputs()" class="text-xs text-slate-400 hover:text-rose-600 font-medium transition">Kosongkan Kotak</button>
+                    </div>
+                    <textarea id="grader-answer" rows="5" placeholder="Tulis atau tampal jawapan KBAT anda di sini (walaupun tanpa soalan). Sistem akan menyemak setiap ayat dan menerangkan sebab anda mendapat markah (+1M) atau mengapa tiada markah (0M)..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-sm sm:text-base text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"></textarea>
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <p class="text-xs text-slate-500">
+                        <strong class="text-emerald-700">Jaminan Bebas Ralat:</strong> Berfungsi serta-merta di telefon pintar, tablet & komputer. Tiada penolakan markah jika tiada Inferens asalkan poin F+H+C sudah mencukupi.
+                    </p>
+                    <button onclick="gradeAnswerWithAI()" id="btn-grade" class="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-display font-bold text-sm px-6 py-3.5 rounded-xl shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 shrink-0">
+                        <i data-lucide="microscope" class="w-4 h-4"></i>
+                        <span>Semak & Terangkan Sebab Dapat Markah</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading State Grader -->
+            <div id="grader-loading" class="hidden glass-card rounded-2xl border border-emerald-100 p-8 text-center">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto mb-3 animate-spin">
+                    <i data-lucide="loader-2" class="w-6 h-6"></i>
+                </div>
+                <h3 class="font-display font-bold text-slate-800 text-base">Membedah Siasat Jawapan Anda Ayat Demi Ayat...</h3>
+                <p class="text-xs text-slate-500 mt-1">Mengira Fakta, Huraian, Contoh & Inferens Sokongan serta menyusun justifikasi pemarkahan.</p>
+            </div>
+
+            <!-- Grader Results -->
+            <div id="grader-result" class="hidden space-y-5">
+                <!-- Context Detected Banner -->
+                <div class="bg-gradient-to-r from-purple-950 via-indigo-950 to-slate-900 text-white rounded-2xl p-4 sm:p-5 shadow-md border border-purple-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-start sm:items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-400/40 flex items-center justify-center shrink-0 text-purple-300">
+                            <i data-lucide="radar" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-purple-500 text-white" id="grade-mode-pill">
+                                    Konteks/Topik Dikesan
+                                </span>
+                                <span id="grade-engine-badge" class="text-[11px] text-emerald-300 bg-emerald-500/20 border border-emerald-400/30 px-2 py-0.5 rounded-full font-semibold">
+                                    Analisis Selesai
+                                </span>
+                            </div>
+                            <p id="grade-detected-context" class="text-sm sm:text-base font-display font-bold text-white mt-1"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1. Score & Component Tally Card -->
+                <div class="glass-card rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-center">
+                        <!-- Score Box -->
+                        <div class="bg-slate-900 text-white rounded-2xl p-5 text-center flex flex-col items-center justify-center border border-slate-800">
+                            <span class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Markah Disahkan</span>
+                            <div class="text-4xl sm:text-5xl font-display font-extrabold text-amber-400 my-1.5" id="grade-score-display">4 / 4</div>
+                            <span id="grade-band-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                                Cemerlang
+                            </span>
+                        </div>
+
+                        <!-- Component Counter & Explanation -->
+                        <div class="lg:col-span-2 space-y-3">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <h3 class="font-display font-bold text-slate-900 text-xs sm:text-sm uppercase tracking-wider">Kiraan Elemen Dalam Jawapan Anda</h3>
+                                <span id="grade-inferens-status" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                    Status Inferens: Sokongan
+                                </span>
+                            </div>
+
+                            <!-- 4 Pillars Counter -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                                <div class="bg-blue-50/80 border border-blue-200 rounded-xl p-3 text-center">
+                                    <span class="text-[11px] font-bold uppercase text-blue-700 block">Fakta (F)</span>
+                                    <span id="count-f" class="text-2xl font-display font-extrabold text-blue-900">1</span>
+                                    <span class="text-[10px] text-blue-600 block">Isi Utama</span>
+                                </div>
+                                <div class="bg-purple-50/80 border border-purple-200 rounded-xl p-3 text-center">
+                                    <span class="text-[11px] font-bold uppercase text-purple-700 block">Huraian (H)</span>
+                                    <span id="count-h" class="text-2xl font-display font-extrabold text-purple-900">2</span>
+                                    <span class="text-[10px] text-purple-600 block">Penjelasan</span>
+                                </div>
+                                <div class="bg-amber-50/80 border border-amber-200 rounded-xl p-3 text-center">
+                                    <span class="text-[11px] font-bold uppercase text-amber-800 block">Contoh (C)</span>
+                                    <span id="count-c" class="text-2xl font-display font-extrabold text-amber-900">1</span>
+                                    <span class="text-[10px] text-amber-700 block">Bukti Spesifik</span>
+                                </div>
+                                <div class="bg-emerald-50/80 border border-emerald-200 rounded-xl p-3 text-center">
+                                    <span class="text-[11px] font-bold uppercase text-emerald-800 block">Inferens (I)</span>
+                                    <span id="count-i" class="text-2xl font-display font-extrabold text-emerald-900">0</span>
+                                    <span class="text-[10px] text-emerald-700 block">Sokongan (Pilihan)</span>
+                                </div>
+                            </div>
+
+                            <!-- Summary Justification why they got that total score -->
+                            <div class="bg-indigo-50/70 border border-indigo-200/80 rounded-xl p-3.5">
+                                <div class="text-xs font-extrabold uppercase tracking-wider text-indigo-900 mb-1 flex items-center gap-1.5">
+                                    <i data-lucide="scale" class="w-4 h-4 text-indigo-600 shrink-0"></i>
+                                    Rumusan Sebab Anda Mendapat Markah Ini:
+                                </div>
+                                <p id="grade-overall-reason" class="text-xs sm:text-sm text-slate-700 leading-relaxed"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Bedah Siasat Ayat Demi Ayat (Justification Cards) -->
+                <div class="glass-card rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                        <div>
+                            <h3 class="font-display font-bold text-slate-900 text-base flex items-center gap-2">
+                                <i data-lucide="list-checks" class="w-5 h-5 text-indigo-600 shrink-0"></i>
+                                Bedah Siasat Pemarkahan (Ayat Demi Ayat)
+                            </h3>
+                            <p class="text-xs text-slate-500">Penerangan terperinci mengapa setiap bahagian jawapan anda diberi markah (+1M) atau tiada markah (0M).</p>
+                        </div>
+                    </div>
+
+                    <div id="grade-sentence-breakdown" class="space-y-3"></div>
+                </div>
+
+                <!-- 3. Teacher's Advice & Full Mark Upgraded Version -->
+                <div class="glass-card rounded-2xl border-2 border-emerald-500/80 shadow-md overflow-hidden">
+                    <div class="bg-emerald-50/90 border-b border-emerald-200 px-4 sm:px-5 py-3.5 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-display font-bold text-emerald-950 text-sm sm:text-base">Cadangan Jawapan Penambahbaikan (Markah Penuh)</h3>
+                                <p class="text-[11px] text-emerald-700">Versi lengkap mengikut konteks & sudut hujah asal anda dengan penanda [F], [H], [C], dan [I - Sokongan]</p>
+                            </div>
+                        </div>
+                        <button onclick="copyElementText('grade-improved-answer')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition flex items-center gap-1.5">
+                            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                            <span>Salin Jawapan Baiki</span>
+                        </button>
+                    </div>
+                    <div class="p-4 sm:p-6 bg-white space-y-4">
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5">
+                            <span class="text-xs font-bold uppercase text-indigo-700 block mb-1">Tip Penambahbaikan Guru Pakar:</span>
+                            <p id="grade-feedback" class="text-xs sm:text-sm text-slate-700 leading-relaxed"></p>
+                        </div>
+                        <p id="grade-improved-answer" class="text-slate-800 text-sm sm:text-base leading-relaxed whitespace-pre-line bg-emerald-50/30 p-4 rounded-xl border border-emerald-100"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- MOD 3: AI PENJANA SOALAN KBAT & SKEMA (4M & 8M)           -->
+        <!-- ========================================================= -->
+        <section id="panel-generator" class="hidden space-y-6">
+            <div class="glass-card rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-6 no-print">
+                <div class="pb-4 mb-4 border-b border-slate-100">
+                    <h2 class="text-base sm:text-lg font-display font-bold text-slate-900 flex items-center gap-2">
+                        <span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 inline-flex items-center justify-center text-sm shrink-0">3</span>
+                        Penjana Soalan KBAT & Skema Pemarkahan Fleksibel (4M / 8M)
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Bina item KBAT lengkap dengan stimulus, soalan mengikut aras Taksonomi Bloom, dan skema jawapan (1 Set untuk 4M atau 3 Set untuk 8M).</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Subjek</label>
+                        <select id="gen-subject" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition">
+                            <option value="Sejarah">Sejarah</option>
+                            <option value="Bahasa Melayu">Bahasa Melayu</option>
+                            <option value="Pendidikan Moral / Islam">Pendidikan Moral / Islam</option>
+                            <option value="Sains">Sains</option>
+                            <option value="Geografi">Geografi</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Aras Kemahiran Berfikir (Bloom)</label>
+                        <select id="gen-bloom" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition">
+                            <option value="Mengaplikasi">Mengaplikasi (Bagaimanakah anda mengamalkan...)</option>
+                            <option value="Menganalisis">Menganalisis (Mengapakah / Terangkan kesan...)</option>
+                            <option value="Menilai">Menilai (Sejauh manakah / Wajarkah tindakan...)</option>
+                            <option value="Mencipta">Mencipta (Cadangkan inovasi / langkah strategik...)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Peruntukan Markah</label>
+                        <select id="gen-marks" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition">
+                            <option value="4">4 Markah (Struktur - 1 Set FHCI)</option>
+                            <option value="8">8 Markah (Esei - 3 Set: 3F+3H+3C+3I)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Topik / Bab / Isu Semasa</label>
+                    <input type="text" id="gen-topic" placeholder="Contoh: Persekutuan Tanah Melayu 1948 / Kedaulatan Undang-Undang / Keselamatan Siber" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-3 text-sm sm:text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition">
+                </div>
+
+                <div class="flex justify-end">
+                    <button onclick="generateQuestionWithAI()" id="btn-generate" class="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-display font-bold text-sm px-6 py-3.5 rounded-xl shadow-md hover:shadow-lg transition flex items-center justify-center gap-2">
+                        <i data-lucide="file-plus-2" class="w-4 h-4"></i>
+                        <span>Jana Item KBAT & Skema Pemarkahan</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading State Generator -->
+            <div id="gen-loading" class="hidden glass-card rounded-2xl border border-amber-100 p-8 text-center no-print">
+                <div class="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto mb-3 animate-spin">
+                    <i data-lucide="loader-2" class="w-6 h-6"></i>
+                </div>
+                <h3 class="font-display font-bold text-slate-800 text-base">Membina Soalan & Skema Pemarkahan...</h3>
+                <p class="text-xs text-slate-500 mt-1">Menyediakan stimulus situasi, tugasan KBAT, serta skema jawapan dan rubrik pemarkahan.</p>
+            </div>
+
+            <!-- Generator Results -->
+            <div id="gen-result" class="hidden space-y-5">
+                <div class="glass-card print-box rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                        <span class="bg-amber-100 text-amber-900 text-xs font-bold px-3 py-1 rounded-full" id="gen-res-badge">Aras Menilai • 4 Markah</span>
+                        <div class="flex flex-wrap items-center gap-2 no-print">
+                            <button onclick="window.print()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-2 rounded-xl transition flex items-center gap-1.5">
+                                <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                                <span>Cetak</span>
+                            </button>
+                            <button onclick="sendGeneratedToSolver()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3 py-2 rounded-xl transition flex items-center gap-1.5">
+                                <i data-lucide="wand-2" class="w-3.5 h-3.5"></i>
+                                <span>Ke Penyelesai</span>
+                            </button>
+                            <button onclick="practiceGeneratedQuestion()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-2 rounded-xl transition flex items-center gap-1.5">
+                                <i data-lucide="pen-tool" class="w-3.5 h-3.5"></i>
+                                <span>Cuba Jawab di Penyemak</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Stimulus Box -->
+                    <div class="bg-slate-50 border-l-4 border-amber-500 p-4 rounded-r-xl">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Stimulus / Situasi Rangsangan:</span>
+                        <p id="gen-res-stimulus" class="text-sm text-slate-700 italic leading-relaxed"></p>
+                    </div>
+
+                    <!-- Question Box -->
+                    <div class="p-4 bg-indigo-50/50 border border-indigo-100 rounded-xl">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-500 block mb-1">Tugasan Soalan KBAT:</span>
+                        <p id="gen-res-question" class="text-base font-display font-bold text-slate-900"></p>
+                    </div>
+
+                    <!-- Peraturan Pemarkahan / Skema -->
+                    <div class="pt-2">
+                        <details open class="group bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
+                            <summary class="cursor-pointer px-4 py-3 font-display font-bold text-sm text-slate-800 flex items-center justify-between hover:bg-slate-100 transition">
+                                <span class="flex items-center gap-2">
+                                    <i data-lucide="key-round" class="w-4 h-4 text-amber-600"></i>
+                                    Peraturan Pemarkahan & Panduan Sebab Dapat Markah
+                                </span>
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500 group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <div class="p-4 bg-white border-t border-slate-200 space-y-3 text-sm" id="gen-res-skema"></div>
+                        </details>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 text-center text-xs text-slate-400 border-t border-slate-200/70 mt-10 no-print">
+        <p>PintarKBAT AI v3.2 • Enjin Pemecah Klausa & Penambahbaikan Mengikut Sudut Konteks (Punca / Kesan / Langkah) • Berfungsi di Semua Peranti.</p>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Environment or user-configured API key (in-memory for cross-device safety)
+        const envApiKey = "";
+        let userCustomApiKey = "";
+
+        function toggleSettingsModal(show) {
+            const modal = document.getElementById('settings-modal');
+            if (show) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                document.getElementById('custom-api-key').value = userCustomApiKey;
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function saveCustomApiKey() {
+            userCustomApiKey = document.getElementById('custom-api-key').value.trim();
+            toggleSettingsModal(false);
+            showToast(userCustomApiKey ? "Kunci API disimpan! Sistem dalam mod Cloud + Enjin Terbina." : "Menggunakan Enjin Pintar Terbina sepenuhnya.");
+        }
+
+        function clearCustomApiKey() {
+            userCustomApiKey = "";
+            document.getElementById('custom-api-key').value = "";
+            toggleSettingsModal(false);
+            showToast("Sistem ditetapkan kepada Enjin Pintar Terbina (100% Bebas Ralat).");
+        }
+
+        // Safe JSON extractor to strip markdown code blocks or stray text from LLM outputs
+        function safeParseJSON(rawText) {
+            if (!rawText) throw new Error("Empty response");
+            let cleaned = rawText.trim();
+            cleaned = cleaned.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+            const firstBrace = cleaned.indexOf('{');
+            const lastBrace = cleaned.lastIndexOf('}');
+            if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+                cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+            }
+            return JSON.parse(cleaned);
+        }
+
+        // Cloud API Caller with fast timeout so mobile/external devices never hang or error out
+        async function callGeminiAPIWithFallback(payload, fallbackFn) {
+            const activeKey = userCustomApiKey || envApiKey;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${activeKey}`;
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 7500);
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const result = await response.json();
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                const parsed = safeParseJSON(text);
+                parsed._engine = "Cloud AI Gemini";
+                return parsed;
+            } catch (err) {
+                // Seamless, instant fallback to Built-in Smart Linguistic KBAT Engine
+                const localData = fallbackFn();
+                localData._engine = "Enjin Analisis KBAT Terbina";
+                return localData;
+            }
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toast-message');
+            const iconEl = document.getElementById('toast-icon');
+            msgEl.textContent = message;
+            iconEl.className = isError ? "w-5 h-5 text-rose-400 shrink-0" : "w-5 h-5 text-emerald-400 shrink-0";
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3200);
+        }
+
+        function copyElementText(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast("Teks berjaya disalin ke papan keratan!");
+                }).catch(() => fallbackCopyText(text));
+            } else {
+                fallbackCopyText(text);
+            }
+        }
+
+        function fallbackCopyText(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast("Teks berjaya disalin ke papan keratan!");
+            } catch (e) {
+                showToast("Sila pilih teks secara manual untuk menyalin.", true);
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function switchTab(tab) {
+            const tabs = ['solver', 'grader', 'generator'];
+            tabs.forEach(t => {
+                const panel = document.getElementById(`panel-${t}`);
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tab) {
+                    panel.classList.remove('hidden');
+                    btn.className = "tab-btn flex items-center justify-center gap-2 py-3 px-3 rounded-xl font-display font-bold text-xs sm:text-sm transition-all duration-200 bg-white text-indigo-950 shadow-sm";
+                } else {
+                    panel.classList.add('hidden');
+                    btn.className = "tab-btn flex items-center justify-center gap-2 py-3 px-3 rounded-xl font-display font-bold text-xs sm:text-sm transition-all duration-200 text-slate-600 hover:text-slate-900 hover:bg-white/50";
+                }
+            });
+        }
+
+        function setSolverMarks(marks) {
+            document.getElementById('solver-marks').value = marks;
+            const btn4 = document.getElementById('solver-btn-4m');
+            const btn8 = document.getElementById('solver-btn-8m');
+            const indicator = document.getElementById('solver-mode-indicator');
+
+            if (marks === 4) {
+                btn4.className = "py-2 px-2.5 rounded-lg font-display font-bold text-xs transition bg-indigo-600 text-white shadow-sm";
+                btn8.className = "py-2 px-2.5 rounded-lg font-display font-bold text-xs transition text-slate-600 hover:text-slate-900";
+                indicator.innerHTML = `<i data-lucide="info" class="w-4 h-4 shrink-0"></i><span>Mod Semasa: <strong>4 Markah (Struktur)</strong> — Menjana 1 Set Isi (1F+1H+1C) + 1 Inferens Sokongan.</span>`;
+            } else {
+                btn8.className = "py-2 px-2.5 rounded-lg font-display font-bold text-xs transition bg-amber-500 text-slate-950 shadow-sm";
+                btn4.className = "py-2 px-2.5 rounded-lg font-display font-bold text-xs transition text-slate-600 hover:text-slate-900";
+                indicator.innerHTML = `<i data-lucide="layers" class="w-4 h-4 shrink-0"></i><span>Mod Semasa: <strong>8 Markah (Esei)</strong> — Menjana <strong>3 Set Lengkap (3F + 3H + 3C + 3I Sokongan)</strong> sebagai insurans markah penuh 8/8.</span>`;
+            }
+            lucide.createIcons();
+        }
+
+        function setGraderMarks(marks) {
+            document.getElementById('grader-marks').value = marks;
+            const btn4 = document.getElementById('grader-btn-4m');
+            const btn8 = document.getElementById('grader-btn-8m');
+
+            if (marks === 4) {
+                btn4.className = "py-2 px-2.5 rounded-lg font-display font-bold text-xs transition bg-emerald-600 text-white shadow-sm";
+                btn8.className = "py-2 px-2.5 rounded-lg font-display font-bold text-xs transition text-slate-600 hover:text-slate-900";
+            } else {
+                btn8.className = "py-2 px-2.5 rounded-lg font-display font-bold text-xs transition bg-emerald-600 text-white shadow-sm";
+                btn4.className = "py-2 px-2.5 rounded-lg font-display font-bold text-xs transition text-slate-600 hover:text-slate-900";
+            }
+        }
+
+        function clearGraderInputs() {
+            document.getElementById('grader-question').value = "";
+            document.getElementById('grader-answer').value = "";
+            document.getElementById('grader-result').classList.add('hidden');
+            showToast("Kotak input telah dikosongkan.");
+        }
+
+        // ============================================================================
+        // BUILT-IN SMART LINGUISTIC KBAT ENGINE (100% RELIABLE ON ALL DEVICES)
+        // ============================================================================
+
+        // 1. Auto-detect Topic & Question Context from text
+        function detectTopicFromText(questionText, answerText) {
+            const combined = `${questionText} ${answerText}`.toLowerCase();
+            const themes = [
+                { keywords: ['pengodaman', 'penggodaman', 'hack', 'siber', 'peralatan digital', 'qr', 'media sosial', 'berita palsu', 'internet', 'teknologi', 'digital', 'buli siber', 'akta komunikasi'], title: "Keselamatan Siber, Ancaman Penggodaman & Teknologi Digital" },
+                { keywords: ['perpaduan', 'kaum', 'toleransi', 'harmoni', 'rumah terbuka', 'etnik', 'masyarakat majmuk'], title: "Perpaduan Kaum & Keharmonian Nasional" },
+                { keywords: ['kedaulatan', 'negara', 'merdeka', 'patriotisme', 'cinta akan negara', 'keselamatan', 'penjajahan', 'tokoh', 'negara luar', 'palestin', 'israel'], title: "Kedaulatan Negara, Hubungan Luar & Semangat Patriotisme" },
+                { keywords: ['alam sekitar', 'kitar semula', 'pencemaran', 'hijau', 'tenaga suria', 'lestari', 'sampah', 'hutan'], title: "Kelestarian Alam Sekitar & Teknologi Hijau" },
+                { keywords: ['ekonomi', 'perniagaan', 'keusahawanan', 'pendapatan', 'kos sara hidup', 'pelaburan', 'tabungan', 'pembayaran'], title: "Kemakmuran Ekonomi & Pendigitalan Kewangan" },
+                { keywords: ['pendidikan', 'sekolah', 'ilmu', 'pelajar', 'kokurikulum', 'kemahiran', 'membaca'], title: "Kecemerlangan Pendidikan & Pembangunan Modal Insan" },
+                { keywords: ['undang-undang', 'perlembagaan', 'peraturan', 'jenayah', 'rasuah', 'integriti', 'hukuman'], title: "Kedaulatan Undang-Undang & Integriti Nasional" }
+            ];
+
+            for (const theme of themes) {
+                if (theme.keywords.some(k => combined.includes(k))) {
+                    return questionText
+                        ? `${theme.title} — (${questionText})`
+                        : `Isu ${theme.title} (Dikesan secara automatik daripada hujah jawapan anda)`;
+                }
+            }
+
+            const words = answerText.replace(/[^a-zA-Z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 5);
+            const sampleFocus = words.slice(0, 3).join(', ') || "Kemasyarakatan & Negara";
+            return questionText
+                ? `Analisis Soalan: ${questionText}`
+                : `Isu Umum KBAT berkaitan: ${sampleFocus} (Dikesan secara automatik daripada jawapan pelajar)`;
+        }
+
+        // 2. Smart Clause & Punctuation Splitter v3.2 (Fixes missing space after dots/commas & splits inline Fakta + Huraian + Contoh)
+        function splitIntoClauses(rawAnswer) {
+            if (!rawAnswer) return [];
+
+            // Step A: Auto-fix missing spaces after period, exclamation, question mark, or comma
+            // e.g. "pembayaran.Sebagai contoh,QR." -> "pembayaran. Sebagai contoh, QR."
+            let cleaned = rawAnswer
+                .replace(/([.!?])([A-Za-z])/g, '$1 $2')
+                .replace(/,([A-Za-z])/g, ', $1')
+                .replace(/\s+/g, ' ')
+                .trim();
+
+            // Step B: Split by sentence boundaries AND major discourse markers
+            cleaned = cleaned
+                .replace(/([.!?]+)\s+/g, '$1|SPLIT|')
+                .replace(/\s+(?=(?:Pada pendapat saya|Antara langkah|Antara faktor|Antara punca|Antara kesan|Selain itu|Di samping itu|Seterusnya|Akhir sekali|Hal ini dikatakan demikian kerana|Hal ini kerana|Hal ini disebabkan|Langkah ini bertujuan|Tindakan ini bertujuan|Sebagai contoh|Contohnya|Misalnya|Sebagai tamsilnya|Umpamanya|Kesannya|Implikasinya|Natijahnya|Kesimpulannya|Tegasnya|Secara tuntasnya)\b)/gi, '|SPLIT|');
+
+            // Step C: Split inline Huraian conjunctions ("...kerana...", "...supaya...", "...bagi memastikan...")
+            const preliminaryParts = cleaned.split('|SPLIT|').map(s => s.trim()).filter(Boolean);
+            const finalClauses = [];
+
+            const inlineHuraianRegex = /^(.*?)\s+\b(kerana|supaya|bagi memastikan|untuk memastikan)\b\s+(.+)$/i;
+
+            for (const part of preliminaryParts) {
+                const startsWithHuraianMarker = /^(?:hal ini|langkah ini|tindakan ini|ini kerana|kerana|supaya|bagi|untuk|oleh itu,?\s*kita mestilah)/i.test(part);
+                const startsWithContohOrInferens = /^(?:sebagai contoh|contohnya|misalnya|kesannya|implikasinya|natijahnya|tegasnya|kesimpulannya)/i.test(part);
+
+                if (!startsWithHuraianMarker && !startsWithContohOrInferens) {
+                    const match = part.match(inlineHuraianRegex);
+                    if (match) {
+                        const beforeConj = match[1].trim();
+                        const conj = match[2].trim();
+                        const afterConj = match[3].trim();
+                        const beforeWords = beforeConj.split(/\s+/).filter(Boolean).length;
+                        const afterWords = afterConj.split(/\s+/).filter(Boolean).length;
+
+                        if (beforeWords >= 4 && afterWords >= 3) {
+                            finalClauses.push(beforeConj);
+                            finalClauses.push(`${conj} ${afterConj}`);
+                            continue;
+                        }
+                    }
+                }
+                finalClauses.push(part);
+            }
+
+            return finalClauses.filter(c => c.length > 1);
+        }
+
+        // Alias for backward compatibility
+        function splitIntoKBATClauses(rawAnswer) {
+            return splitIntoClauses(rawAnswer);
+        }
+
+        // 3. Built-in Linguistic KBAT Grader v3.2 (Accurate classification priority & preserves student's valid points)
+        function localAnalyzeStudentAnswer(question, answer, maxMarks) {
+            const clauses = splitIntoClauses(answer);
+            const konteksDikesanAI = detectTopicFromText(question, answer);
+
+            let kiraanFakta = 0;
+            let kiraanHuraian = 0;
+            let kiraanContoh = 0;
+            let kiraanInferens = 0;
+            const pecahanAyat = [];
+
+            const contohStartOrInline = /^(?:sebagai contoh|contohnya|misalnya|seperti|umpamanya|tamsilnya|antaranya termasuklah)\b|\b(?:sebagai contoh|contohnya|misalnya|melalui program|di bawah akta|akta komunikasi|muzium negara|rumah terbuka)\b/i;
+            const inferensStart = /^(?:kesannya|implikasinya|natijahnya|tegasnya|kesimpulannya|secara tuntasnya|konklusinya|akhirnya|secara keseluruhannya)\b/i;
+            const huraianStartOrInline = /^(?:kerana|supaya|agar|demi|bagi|untuk|hal ini dikatakan demikian kerana|hal ini kerana|hal ini disebabkan|hal ini bertujuan|langkah ini bertujuan|tindakan ini bertujuan|langkah ini dapat|tindakan ini dapat|secara tidak langsung|melalui cara ini|rentetan itu)\b|\b(?:hal ini dikatakan demikian kerana|hal ini kerana|bertujuan untuk|bagi memastikan|dapat memudahkan|dapat melahirkan|dapat mengeratkan|menimbulkan rasa)\b/i;
+            const faktaStart = /^(?:pada pendapat saya|antara langkah|antara faktor|antara punca|antara kesan|selain itu|di samping itu|seterusnya|akhir sekali|pertama|kedua|ketiga)\b|\b(?:menjadi sasaran|mengutuk perbuatan|perlulah|mestilah|wajarlah|haruslah)\b/i;
+            const clicheWeakPatterns = /^(?:oleh itu,?\s*)?(?:kita mestilah|ia sangat|kerana ia baik|supaya hidup aman|untuk kebaikan semua|kerana sangat penting).*?(?:baik untuk semua orang|sangat penting|hidup aman)\.?$/i;
+
+            clauses.forEach((clause, idx) => {
+                const cleanClause = clause.trim();
+                const wordCount = cleanClause.split(/\s+/).filter(Boolean).length;
+                const lower = cleanClause.toLowerCase();
+
+                let kategori = "Tiada Markah (0M)";
+                let markahDiberi = 0;
+                let sebabDapatMarkah = "";
+
+                // Priority 1: Check if it is an explicit Contoh (even short ones like "Sebagai contoh, QR.")
+                if (contohStartOrInline.test(lower)) {
+                    const strippedExample = lower.replace(/^(?:sebagai contoh|contohnya|misalnya|seperti|umpamanya|tamsilnya)[,\s]*/i, '').replace(/[.!?]+$/, '').trim();
+                    if (strippedExample.length >= 2) {
+                        kategori = "Contoh (C)";
+                        markahDiberi = 1;
+                        kiraanContoh++;
+                        sebabDapatMarkah = `Ayat/klausa ini layak mendapat +1 markah Contoh [C] kerana mengemukakan bukti spesifik atau ilustrasi konkrit ("${strippedExample}") bagi menyokong hujah sebelumnya.`;
+                    } else {
+                        kategori = "Tiada Markah (Contoh Tidak Lengkap)";
+                        markahDiberi = 0;
+                        sebabDapatMarkah = "Penanda wacana contoh ditulis tetapi tiada contoh spesifik dinyatakan selepasnya.";
+                    }
+                }
+                // Priority 2: Check weak / generic cliché statements ("kerana ia sangat baik untuk semua orang")
+                else if (clicheWeakPatterns.test(lower)) {
+                    kategori = "Tiada Markah (Pernyataan Umum / Klise)";
+                    markahDiberi = 0;
+                    sebabDapatMarkah = "Pernyataan ini terlalu umum/klise ('baik untuk semua orang') tanpa menjelaskan kesan spesifik kepada diri, masyarakat, atau negara.";
+                }
+                // Priority 3: Check Inferens
+                else if (inferensStart.test(lower)) {
+                    if (lower.includes("baik untuk semua") || wordCount < 5) {
+                        kategori = "Tiada Markah (Inferens Umum)";
+                        markahDiberi = 0;
+                        sebabDapatMarkah = "Walaupun menggunakan penanda wacana kesimpulan, impak yang dinyatakan terlalu cetek/umum. Nyatakan kesan spesifik kepada masyarakat atau negara.";
+                    } else {
+                        kategori = "Inferens Sokongan (I)";
+                        markahDiberi = 1;
+                        kiraanInferens++;
+                        sebabDapatMarkah = "Ayat ini layak mendapat +1 markah Inferens Sokongan [I] kerana merumuskan impak jangka panjang yang matang terhadap kesejahteraan masyarakat/negara.";
+                    }
+                }
+                // Priority 4: Check Huraian (clauses starting with 'kerana...', 'Hal ini dikatakan demikian kerana...', 'supaya...', etc.)
+                else if (huraianStartOrInline.test(lower) && !/^(?:pada pendapat saya|selain itu|di samping itu|antara langkah)\b/i.test(lower)) {
+                    if (wordCount < 3) {
+                        kategori = "Tiada Markah (Huraian Terlalu Pendek)";
+                        markahDiberi = 0;
+                        sebabDapatMarkah = "Klausa huraian ini terlalu ringkas dan belum menjelaskan sebab atau cara secara lengkap.";
+                    } else {
+                        kategori = "Huraian (H)";
+                        markahDiberi = 1;
+                        kiraanHuraian++;
+                        sebabDapatMarkah = "Klausa/ayat ini layak mendapat +1 markah Huraian [H] kerana memperincikan sebab ('kerana...'), tujuan, atau kesan langsung bagi menyokong Fakta.";
+                    }
+                }
+                // Priority 5: Too short fragment (that wasn't a valid Contoh)
+                else if (wordCount < 4) {
+                    kategori = "Tiada Markah (Frasa Terlalu Pendek)";
+                    markahDiberi = 0;
+                    sebabDapatMarkah = "Frasa ini terlalu pendek dan belum membentuk pernyataan Fakta, Huraian, atau Contoh yang lengkap.";
+                }
+                // Priority 6: Check Fakta (Isi Utama / Cadangan / Faktor)
+                else if (faktaStart.test(lower) || idx === 0 || kiraanFakta === 0) {
+                    kategori = "Fakta (F)";
+                    markahDiberi = 1;
+                    kiraanFakta++;
+                    sebabDapatMarkah = "Ayat/klausa ini layak mendapat +1 markah Fakta [F] kerana menyatakan isi utama, punca, atau cadangan tindakan yang jelas dan menjawab kehendak tugasan.";
+                }
+                // Priority 7: Meaningful continuation sentence acts as Huraian Lanjut
+                else {
+                    kategori = "Huraian (H)";
+                    markahDiberi = 1;
+                    kiraanHuraian++;
+                    sebabDapatMarkah = "Ayat ini layak mendapat +1 markah Huraian Lanjut [H] kerana mengembangkan idea utama dengan keterangan tambahan yang relevan.";
+                }
+
+                pecahanAyat.push({
+                    petikanAyat: cleanClause,
+                    kategori,
+                    markahDiberi,
+                    sebabDapatMarkah
+                });
+            });
+
+            const rawTotalPoints = kiraanFakta + kiraanHuraian + kiraanContoh + kiraanInferens;
+            const markahDiperoleh = Math.min(rawTotalPoints, maxMarks);
+            const fhcOnly = kiraanFakta + kiraanHuraian + kiraanContoh;
+
+            let tahapPrestasi = "Sederhana (Perlu Pengembangan)";
+            if (markahDiperoleh === maxMarks) {
+                tahapPrestasi = maxMarks === 8 ? "Cemerlang • Aras 4 (Markah Penuh 8/8)" : "Cemerlang (Markah Penuh 4/4)";
+            } else if (markahDiperoleh >= maxMarks * 0.7) {
+                tahapPrestasi = `Baik • Aras 3 (${markahDiperoleh}/${maxMarks} Markah - Hampir Penuh!)`;
+            } else if (markahDiperoleh <= 1) {
+                tahapPrestasi = "Lemah • Aras 1 (Fakta Ringkas)";
+            }
+
+            let statusInferensNota = "";
+            if (kiraanInferens === 0 && fhcOnly >= maxMarks) {
+                statusInferensNota = `Markah Penuh ${maxMarks}/${maxMarks} Dicapai Tanpa Inferens! (Kombinasi ${kiraanFakta}F + ${kiraanHuraian}H + ${kiraanContoh}C sudah mencukupi)`;
+            } else if (kiraanInferens > 0) {
+                statusInferensNota = `Inferens Sokongan Ada (${kiraanInferens}I) — Bertindak sebagai pelengkap & insurans markah`;
+            } else {
+                const baki = maxMarks - markahDiperoleh;
+                statusInferensNota = `Tiada Inferens (Tambah ${baki} lagi poin melalui Inferens 'Kesannya,...' atau tambah Set Isi ke-${kiraanFakta + 1} untuk capai ${maxMarks}/${maxMarks})`;
+            }
+
+            let rumusanSebabMarkah = `Daripada ${clauses.length} klausa/ayat yang dibedah siasat (termasuk pemisahan automatik ayat rapat & kata hubung), anda berjaya mengemukakan ${kiraanFakta} Fakta (F), ${kiraanHuraian} Huraian (H), ${kiraanContoh} Contoh (C), dan ${kiraanInferens} Inferens Sokongan (I) yang bernas (Jumlah poin sah: ${rawTotalPoints} poin). `;
+            if (markahDiperoleh === maxMarks) {
+                if (kiraanInferens === 0) {
+                    rumusanSebabMarkah += `Mengikut skema pemarkahan fleksibel KSSM, walaupun anda tidak menulis ayat Inferens, gabungan Fakta, Huraian, dan Contoh anda (${kiraanFakta}F + ${kiraanHuraian}H + ${kiraanContoh}C = ${fhcOnly} poin) sudah mencukupi untuk melayakkan anda mendapat markah penuh ${maxMarks}/${maxMarks}!`;
+                } else {
+                    rumusanSebabMarkah += `Hujah anda sangat lengkap, matang, dan memenuhi kesemua kriteria pemarkahan untuk memperoleh markah penuh ${maxMarks}/${maxMarks}.`;
+                }
+            } else {
+                const kurang = maxMarks - markahDiperoleh;
+                if (maxMarks === 8 && markahDiperoleh >= 5) {
+                    rumusanSebabMarkah += `Anda sudah memperoleh ${markahDiperoleh}/8 markah kerana mempunyai ${kiraanFakta} set isi yang baik (${kiraanFakta}F + ${kiraanHuraian}H + ${kiraanContoh}C). Mengapa belum 8/8? Kerana untuk soalan Esei 8 Markah, anda memerlukan ${kurang} lagi poin — sama ada dengan menambah ayat Inferens ('Kesannya,...') pada setiap perenggan, atau menambah Set Isi ke-3 (F3 + H3 + C3).`;
+                } else {
+                    const missingParts = [];
+                    if (kiraanFakta === 0) missingParts.push("Fakta (isi utama)");
+                    if (kiraanHuraian === 0) missingParts.push("Huraian (penjelasan 'Hal ini kerana...')");
+                    if (kiraanContoh === 0) missingParts.push("Contoh spesifik ('Sebagai contoh,...')");
+                    rumusanSebabMarkah += `Jawapan anda masih kekurangan ${kurang} markah untuk mencapai ${maxMarks}/${maxMarks}. ${missingParts.length > 0 ? 'Elemen yang belum kelihatan ialah ' + missingParts.join(', ') + '.' : 'Sila tambah huraian, contoh, atau set isi tambahan.'}`;
+                }
+            }
+
+            let ulasanGuru = "";
+            if (markahDiperoleh === maxMarks) {
+                ulasanGuru = "Syabas! Struktur jawapan anda sangat kemas. Kekalkan penggunaan penanda wacana yang jelas bagi membezakan Fakta, Huraian, dan Contoh semasa peperiksaan sebenar.";
+            } else {
+                ulasanGuru = `Jawapan asal anda sudah mempunyai ${markahDiperoleh} poin bernas! Untuk mencukupkan markah penuh ${maxMarks}/${maxMarks}, lihat bagaimana setiap set isi asal anda dikekalkan di bawah dan dilengkapkan mengikut sudut hujah yang sama tanpa mengubah maksud asal anda.`;
+            }
+
+            const jawapanPenambahbaikan = buildUpgradedAnswer(question, answer, maxMarks, pecahanAyat);
+
+            return {
+                konteksDikesanAI,
+                markahDiperoleh,
+                tahapPrestasi,
+                kiraanFakta,
+                kiraanHuraian,
+                kiraanContoh,
+                kiraanInferens,
+                statusInferensNota,
+                rumusanSebabMarkah,
+                pecahanAyat,
+                ulasanGuru,
+                jawapanPenambahbaikan
+            };
+        }
+
+        // 4. Smart Context-Aware Improvement Generator v3.2
+        // (Mengikat F, H, C, I mengikut Set Perenggan Asal Pelajar + Auto-Kesan Sudut Punca vs Kesan vs Langkah)
+        function buildUpgradedAnswer(question, studentAnswer, maxMarks, pecahanAyat) {
+            const combinedText = `${question} ${studentAnswer}`.toLowerCase();
+
+            // A. Kesan Sudut Soalan/Jawapan: Adakah tentang PUNCA/FAKTOR/SASARAN, KESAN/MANFAAT, atau LANGKAH/CARA?
+            let angle = "langkah";
+            if (/(?:sasaran|punca|faktor|mengapakah|sebab|ancaman|mengutuk|menyerang|disebabkan)/i.test(combinedText) && !/(?:langkah|cara|usaha|bagaimanakah.*?(?:mengatasi|membendung|memupuk|memperkukuh|memelihara|mempertahankan))/i.test(question)) {
+                angle = "punca";
+            } else if (/(?:kesan|impak|implikasi|akibat|manfaat|kebaikan|kepentingan)/i.test(combinedText) && !/(?:langkah|cara|bagaimanakah)/i.test(question)) {
+                angle = "kesan";
+            }
+
+            // B. Kumpulkan klausa sah pelajar mengikut pasangan SET ISI (supaya Contoh Set 2 tidak melompat masuk ke Set 1)
+            const studentSets = [];
+            let currentSet = { f: "", h: [], c: "", i: "" };
+
+            pecahanAyat.forEach(item => {
+                if (item.markahDiberi <= 0) return;
+                const kat = item.kategori || "";
+                const text = item.petikanAyat.trim();
+
+                if (kat.includes("Fakta")) {
+                    if (currentSet.f || currentSet.h.length > 0 || currentSet.c || currentSet.i) {
+                        studentSets.push(currentSet);
+                        currentSet = { f: "", h: [], c: "", i: "" };
+                    }
+                    currentSet.f = text;
+                } else if (kat.includes("Huraian")) {
+                    currentSet.h.push(text);
+                } else if (kat.includes("Contoh")) {
+                    if (!currentSet.c) currentSet.c = text;
+                    else currentSet.h.push(text);
+                } else if (kat.includes("Inferens")) {
+                    currentSet.i = text;
+                }
+            });
+            if (currentSet.f || currentSet.h.length > 0 || currentSet.c || currentSet.i) {
+                studentSets.push(currentSet);
+            }
+
+            const formatHuraian = (hArr) => {
+                if (!hArr || hArr.length === 0) return "";
+                return hArr.map(h => {
+                    const trimmed = h.trim();
+                    if (/^kerana\b/i.test(trimmed)) return "Hal ini dikatakan demikian " + trimmed;
+                    if (/^(?:supaya|agar|bagi|untuk)\b/i.test(trimmed)) return "Langkah ini bertujuan " + trimmed;
+                    return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+                }).map(ensurePeriod).join(" ");
+            };
+
+            // C. Bank Konteks Pintar Mengikut Topik & Sudut Hujah (Punca vs Kesan vs Langkah)
+            let bank = [];
+
+            if (/(?:pengodaman|penggodaman|hack|siber|qr|digital|israel|palestin)/i.test(combinedText) && angle === "punca") {
+                // Khas untuk kes Punca/Faktor Malaysia menjadi sasaran ancaman penggodaman / hack
+                bank = [
+                    {
+                        f: "Antara faktor utama Malaysia menjadi sasaran ancaman penggodaman ialah kepesatan penggunaan peralatan serta aplikasi pembayaran digital dalam urusan harian rakyat.",
+                        h: "Hal ini dikatakan demikian kerana kebergantungan tinggi terhadap transaksi dalam talian menjadikan pangkalan data kewangan pengguna sasaran bernilai kepada penjenayah siber.",
+                        c: "Sebagai contoh, penggunaan meluas pembayaran tanpa tunai menerusi imbasan kod QR, e-dompet, dan perbankan dalam talian.",
+                        i: "Kesannya, sebarang kelemahan keselamatan pada sistem pembayaran digital tersebut membuka ruang kepada risiko kebocoran data peribadi dan kerugian kewangan rakyat."
+                    },
+                    {
+                        f: "Selain itu, ketegasan Malaysia mengutuk perbuatan negatif dan penindasan kuasa asing di pentas antarabangsa turut mengundang tindak balas kumpulan penggodam luar.",
+                        h: "Hal ini dikatakan demikian kerana pendirian lantang Malaysia sering menimbulkan rasa tidak puas hati kepada negara luar yang terlibat serta sekutu mereka.",
+                        c: "Sebagai contoh, kelantangan Malaysia mengutuk tindakan kejam Israel menyerang Palestin telah mencetuskan cubaan serangan siber ke atas portal rasmi negara.",
+                        i: "Implikasinya, kumpulan penggodam bermotifkan politik cuba mengganggu sistem maklumat negara sebagai tindak balas terhadap pendirian tegas Malaysia."
+                    },
+                    {
+                        f: "Akhir sekali, tahap kesedaran keselamatan siber yang masih rendah dalam kalangan segelintir pengguna dan organisasi tempatan turut menjadi punca Malaysia mudah disasarkan.",
+                        h: "Hal ini berpunca daripada sikap kurang berwaspada ketika mengakses pautan meragukan serta penggunaan perisian keselamatan yang tidak dikemas kini.",
+                        c: "Contohnya, pengguna yang mudah terpedaya dengan e-mel pancingan data (phishing), pautan palsu, serta penggunaan kata laluan yang lemah.",
+                        i: "Tegasnya, kelemahan aspek kesedaran pengguna dan teknikal ini memudahkan penggodam luar menceroboh sistem rangkaian di negara kita."
+                    }
+                ];
+            } else if (/(?:buli siber|berita palsu|media sosial|akta komunikasi|fitnah)/i.test(combinedText)) {
+                bank = [
+                    {
+                        f: "Antara langkah utama membendung gejala tidak beretika di media sosial ialah pihak kerajaan perlu memperketat penguatkuasaan undang-undang komunikasi.",
+                        h: "Hal ini dikatakan demikian kerana hukuman yang tegas dapat memberi pengajaran dan menakutkan pengguna media sosial daripada meninggalkan komen berbaur kebencian atau berita palsu.",
+                        c: "Sebagai contoh, pesalah boleh dikenakan tindakan tegas di bawah Akta Komunikasi dan Multimedia 1998 oleh pihak SKMM dan PDRM.",
+                        i: "Kesannya, keselamatan dan kesejahteraan emosi pengguna internet di negara kita dapat dipelihara."
+                    },
+                    {
+                        f: "Selain itu, pengguna media sosial sendiri perlulah mengamalkan etika penggunaan digital yang berhemah serta menyemak kesahihan maklumat sebelum berkongsi.",
+                        h: "Langkah ini bertujuan untuk mengelakkan penularan fitnah atau maklumat tidak tepat yang boleh menggugat keharmonian masyarakat.",
+                        c: "Misalnya, membuat semakan fakta melalui portal Sebenarnya.my atau saluran berita rasmi kerajaan.",
+                        i: "Implikasinya, budaya masyarakat yang bermaklumat, matang, dan saling menghormati di ruang siber dapat diwujudkan."
+                    },
+                    {
+                        f: "Akhir sekali, institusi keluarga dan sekolah hendaklah memperkasakan pendidikan literasi digital serta nilai murni sejak usia muda.",
+                        h: "Hal ini kerana bimbingan awal dapat membentuk jati diri pelajar agar menggunakan teknologi untuk tujuan yang bermanfaat sahaja.",
+                        c: "Contohnya, menganjurkan kempen kesedaran Klik Dengan Bijak dan sesi kaunseling di sekolah.",
+                        i: "Tegasnya, kerjasama semua pihak akan melahirkan generasi digital yang bertanggungjawab dan berintegriti tinggi."
+                    }
+                ];
+            } else if (/(?:perpaduan|kaum|toleransi|harmoni|etnik|rumah terbuka)/i.test(combinedText)) {
+                bank = [
+                    {
+                        f: "Antara langkah memperkukuh perpaduan kaum ialah melalui pemerkasaan sistem pendidikan kebangsaan yang menggunakan sukatan pelajaran yang sama.",
+                        h: "Hal ini bertujuan untuk memupuk persefahaman dan nilai toleransi sejak di bangku sekolah lagi.",
+                        c: "Sebagai contoh, pelaksanaan aktiviti kokurikulum, sukan, dan program RIMUP di sekolah yang melibatkan semua pelajar pelbagai kaum.",
+                        i: "Kesannya, jurang perbezaan antara kaum dapat dirapatkan demi melahirkan generasi warganegara yang bersatu padu."
+                    },
+                    {
+                        f: "Selain itu, masyarakat perlulah mengamalkan budaya kunjung-mengunjungi semasa sambutan perayaan utama di Malaysia.",
+                        h: "Tindakan ini dapat mengeratkan hubungan silaturahim serta memupuk rasa hormat-menghormati antara jiran tetangga berbilang bangsa.",
+                        c: "Contohnya, penganjuran Rumah Terbuka Aidilfitri, Tahun Baharu Cina, Deepavali, Hari Gawai, dan Pesta Kaamatan.",
+                        i: "Implikasinya, keharmonian masyarakat majmuk akan terus kukuh dan mengelakkan sebarang prasangka perkauman."
+                    },
+                    {
+                        f: "Akhir sekali, kerajaan wajar menganjurkan kempen kesedaran perpaduan secara berterusan melalui pelbagai medium komunikasi.",
+                        h: "Langkah ini dapat menyemai semangat cinta akan tanah air dan kebersamaan dalam kalangan seluruh warganegara.",
+                        c: "Misalnya, menerusi penyiaran iklan patriotik serta program kemasyarakatan bertemakan Malaysia MADANI di televisyen dan media sosial.",
+                        i: "Tegasnya, perpaduan yang utuh menjadi tunjang kestabilan politik dan kemakmuran ekonomi negara secara berpanjangan."
+                    }
+                ];
+            } else if (/(?:alam sekitar|kitar semula|pencemaran|hijau|suria|tenaga|sampah)/i.test(combinedText)) {
+                if (angle === "kesan") {
+                    bank = [
+                        {
+                            f: "Antara manfaat utama penggunaan tenaga boleh baharu dan amalan lestari ialah dapat mengurangkan pencemaran alam sekitar secara drastik.",
+                            h: "Hal ini dikatakan demikian kerana penjanaan tenaga bersih tidak membebaskan gas rumah hijau atau asap beracun ke udara.",
+                            c: "Sebagai contoh, penggunaan panel tenaga suria dan tenaga hidroelektrik bagi menggantikan pembakaran bahan api fosil.",
+                            i: "Kesannya, masalah pemanasan global dapat dikawal dan kualiti udara yang bersih dapat dinikmati oleh masyarakat."
+                        },
+                        {
+                            f: "Selain itu, peralihan kepada teknologi hijau turut menjana pertumbuhan ekonomi baharu serta menjimatkan kos tenaga jangka panjang.",
+                            h: "Hal ini kerana industri tenaga lestari menarik pelaburan asing dan membuka peluang pekerjaan berkemahiran tinggi kepada rakyat tempatan.",
+                            c: "Misalnya, perkembangan pesat industri pemasangan solar, pembuatan kenderaan elektrik (EV), dan kitar semula moden di Malaysia.",
+                            i: "Implikasinya, daya saing ekonomi negara dapat diperkukuh seiring dengan matlamat pembangunan mampan."
+                        },
+                        {
+                            f: "Akhir sekali, amalan pemeliharaan alam sekitar memastikan sumber semula jadi negara tidak pupus untuk kegunaan generasi akan datang.",
+                            h: "Langkah ini memastikan keseimbangan ekosistem hutan dan marin sentiasa terpelihara daripada kemusnahan.",
+                            c: "Contohnya, pengurangan sisa di tapak pelupusan melalui kitar semula kertas, plastik, kaca, dan aluminium.",
+                            i: "Tegasnya, kelestarian alam sekitar menjamin kesejahteraan hidup dan kesihatan rakyat secara berterusan."
+                        }
+                    ];
+                } else {
+                    bank = [
+                        {
+                            f: "Pada pendapat saya, amalan kitar semula dapat mengurangkan lambakan sampah sarap di tapak pelupusan secara berkesan.",
+                            h: "Hal ini dikatakan demikian kerana barang terpakai diproses semula menjadi bahan baharu tanpa perlu membuka tapak pelupusan baharu.",
+                            c: "Sebagai contoh, mengasingkan sisa kertas, botol plastik, kaca, dan tin aluminium mengikut tong kitar semula berwarna yang disediakan.",
+                            i: "Kesannya, pencemaran tanah, bau, dan air larut resap dapat dielakkan demi menjamin persekitaran yang bersih serta sihat."
+                        },
+                        {
+                            f: "Selain itu, pihak kerajaan dan industri perlulah memperluas penggunaan teknologi hijau serta tenaga boleh baharu.",
+                            h: "Langkah ini bertujuan untuk mengurangkan pelepasan karbon yang menjadi punca utama perubahan iklim dan pemanasan global.",
+                            c: "Misalnya, pemberian insentif pemasangan panel tenaga suria dan penggunaan beg mesra alam menggantikan plastik sekali guna.",
+                            i: "Implikasinya, keseimbangan ekosistem dan khazanah alam semula jadi negara dapat diwarisi oleh generasi akan datang."
+                        },
+                        {
+                            f: "Akhir sekali, penguatkuasaan undang-undang alam sekitar yang lebih tegas hendaklah dilaksanakan terhadap pihak yang melakukan pencemaran.",
+                            h: "Hal ini kerana hukuman berat dapat memberi pengajaran kepada pihak tidak bertanggungjawab agar mematuhi piawaian kelestarian.",
+                            c: "Contohnya, mengenakan denda maksimum di bawah Akta Kualiti Alam Sekeliling 1974 oleh Jabatan Alam Sekitar (JAS).",
+                            i: "Tegasnya, gabungan kesedaran masyarakat dan ketegasan undang-undang akan memastikan kelestarian alam sekitar terus terpelihara."
+                        }
+                    ];
+                }
+            } else if (/(?:patriotisme|kedaulatan|merdeka|muzium|bulan kebangsaan|sejarah|penjajahan)/i.test(combinedText)) {
+                bank = [
+                    {
+                        f: "Antara langkah utama ialah generasi muda perlulah menghayati sejarah perjuangan tokoh-tokoh kemerdekaan negara.",
+                        h: "Hal ini dikatakan demikian kerana pengetahuan sejarah dapat melahirkan rasa syukur atas keamanan yang dikecapi serta mengelakkan diri daripada terpengaruh dengan anasir luar.",
+                        c: "Sebagai contoh, pelajar boleh melawat Muzium Negara, Tugu Negara, atau menyertai sambutan Bulan Kebangsaan di sekolah.",
+                        i: "Kesannya, semangat cinta akan negara yang mendalam akan terbentuk dalam jiwa setiap warganegara."
+                    },
+                    {
+                        f: "Selain itu, generasi muda hendaklah menguasai ilmu pengetahuan dan kemahiran teknologi tinggi bagi mempertahankan kedaulatan negara.",
+                        h: "Langkah ini bertujuan untuk melahirkan modal insan yang berdaya saing dan mampu melindungi negara daripada ancaman penjajahan bentuk baharu seperti serangan ekonomi dan siber.",
+                        c: "Misalnya, melanjutkan pengajian dalam bidang sains, teknologi, kejuruteraan, serta keselamatan digital.",
+                        i: "Implikasinya, Malaysia akan menjadi sebuah negara maju yang berdikari dan dihormati di persada dunia."
+                    },
+                    {
+                        f: "Akhir sekali, setiap warganegara mestilah mengamalkan prinsip Rukun Negara dan mematuhi keluhuran perlembagaan.",
+                        h: "Hal ini kerana kepatuhan kepada undang-undang dapat menjamin ketenteraman awam dan mengelakkan perpecahan dalam masyarakat.",
+                        c: "Contohnya, menghormati institusi Raja Berperlembagaan, lambang-lambang negara seperti Jalur Gemilang, dan lagu Negaraku.",
+                        i: "Tegasnya, kedaulatan dan kemerdekaan tanah air akan terus kekal terpelihara buat selama-lamanya."
+                    }
+                ];
+            } else if (angle === "punca") {
+                bank = [
+                    {
+                        f: "Antara faktor utama berlakunya isu ini ialah perkembangan pesat teknologi dan perubahan gaya hidup masyarakat pada masa kini.",
+                        h: "Hal ini dikatakan demikian kerana keterbukaan maklumat dan urusan moden mewujudkan cabaran baharu yang memerlukan kawalan rapi.",
+                        c: "Sebagai contoh, kebergantungan harian masyarakat terhadap peranti pintar, sistem digital, dan jaringan komunikasi global.",
+                        i: "Kesannya, pelbagai risiko dan cabaran baharu timbul sekiranya aspek keselamatan tidak diberi perhatian serius."
+                    },
+                    {
+                        f: "Selain itu, faktor sikap segelintir pihak yang kurang peka terhadap peraturan dan kesan tindakan mereka turut menyumbang kepada masalah ini.",
+                        h: "Hal ini kerana sikap sambil lewa atau tindak balas emosi sering mencetuskan ketegangan serta membuka ruang kepada ancaman luar.",
+                        c: "Misalnya, tindakan mengabaikan garis panduan keselamatan atau terbabit dalam konflik terbuka di peringkat global.",
+                        i: "Implikasinya, kestabilan organisasi dan keselamatan masyarakat boleh terjejas jika perkara ini dibiarkan berlarutan."
+                    },
+                    {
+                        f: "Akhir sekali, kelemahan dari sudut pemantauan dan kesedaran pencegahan dalam kalangan masyarakat turut menjadi punca utama.",
+                        h: "Hal ini berpunca daripada kurangnya pendedahan berterusan mengenai langkah perlindungan awal bagi menangani risiko tersebut.",
+                        c: "Contohnya, masih ramai individu yang gagal mengambil langkah berjaga-jaga walaupun amaran telah dikeluarkan oleh pihak berkuasa.",
+                        i: "Tegasnya, pemahaman mendalam terhadap punca-punca ini amat penting bagi merangka strategi penyelesaian yang berkesan."
+                    }
+                ];
+            } else {
+                // Bank Umum (Langkah / Usaha)
+                bank = [
+                    {
+                        f: "Antara langkah utama yang wajar dilaksanakan ialah memperkasakan penghayatan ilmu pengetahuan serta jati diri dalam kalangan masyarakat.",
+                        h: "Hal ini dikatakan demikian kerana masyarakat yang berilmu dan berintegriti mampu menilai sesuatu isu dengan matang serta tidak mudah terpengaruh dengan anasir negatif.",
+                        c: "Sebagai contoh, pelaksanaan program pendidikan sivik, kempen kesedaran kebangsaan, serta aktiviti kemasyarakatan secara berterusan.",
+                        i: "Kesannya, kesejahteraan hidup rakyat dan kedaulatan negara dapat dipertahankan pada setiap masa."
+                    },
+                    {
+                        f: "Selain itu, pihak berkuasa perlulah memperketat penguatkuasaan undang-undang serta memperkukuh dasar keselamatan negara.",
+                        h: "Tindakan ini bertujuan untuk membendung sebarang bentuk ancaman dari dalam mahupun luar negara dengan lebih berkesan.",
+                        c: "Misalnya, pemantauan berterusan oleh agensi keselamatan serta penguatkuasaan akta berkaitan secara tegas dan adil.",
+                        i: "Implikasinya, keamanan negara dan ketenteraman awam akan terus terjamin."
+                    },
+                    {
+                        f: "Akhir sekali, kerjasama strategik antara kerajaan, swasta, dan rakyat hendaklah digembleng secara menyeluruh.",
+                        h: "Hal ini kerana usaha yang bersepadu dapat memastikan setiap dasar pembangunan dan keselamatan mencapai matlamat yang ditetapkan.",
+                        c: "Contohnya, memanfaatkan teknologi moden dan media massa untuk menyebarkan maklumat sahih serta memupuk semangat patriotisme.",
+                        i: "Tegasnya, sinergi semua pihak merupakan tunjang utama dalam memacu kemajuan dan kestabilan negara."
+                    }
+                ];
+            }
+
+            // D. Bina Perenggan Lengkap Dengan Mengekalkan Ayat Asal Pelajar Mengikut Set
+            const totalSetsNeeded = maxMarks === 4 ? 1 : 3;
+            const outputParagraphs = [];
+
+            for (let idx = 0; idx < totalSetsNeeded; idx++) {
+                const n = idx + 1;
+                const sSet = studentSets[idx] || { f: "", h: [], c: "", i: "" };
+                const fallback = bank[idx] || bank[0];
+
+                const fPart = sSet.f
+                    ? `[F${n} - Kekal Jawapan Anda (+1M)] ${ensurePeriod(sSet.f)}`
+                    : `[F${n} - Ditambah Mengikut Konteks (+1M)] ${fallback.f}`;
+
+                const hPart = sSet.h.length > 0
+                    ? `[H${n} - Kekal Jawapan Anda (+1M)] ${formatHuraian(sSet.h)}`
+                    : `[H${n} - Ditambah Mengikut Konteks (+1M)] ${fallback.h}`;
+
+                const cPart = sSet.c
+                    ? `[C${n} - Kekal Jawapan Anda (+1M)] ${ensurePeriod(sSet.c)}`
+                    : `[C${n} - Ditambah Mengikut Konteks (+1M)] ${fallback.c}`;
+
+                const iPart = sSet.i
+                    ? `[I${n} - Kekal Jawapan Anda (+1M)] ${ensurePeriod(sSet.i)}`
+                    : `[I${n} - Inferens Sokongan Ditambah (+1M)] ${fallback.i}`;
+
+                if (maxMarks === 4) {
+                    outputParagraphs.push(`${fPart} ${hPart} ${cPart} ${iPart}`);
+                } else {
+                    outputParagraphs.push(`Perenggan Set Isi ${n}:\n${fPart} ${hPart} ${cPart} ${iPart}`);
+                }
+            }
+
+            return outputParagraphs.join("\n\n");
+        }
+
+        function ensurePeriod(str) {
+            const s = str.trim();
+            return /[.!?]$/.test(s) ? s : s + '.';
+        }
+
+        // 5. Built-in Context-Aware Solver for Tab 1 (Matches exact question topic & angle)
+        function localSolveKBAT(question, subject, marks, focus) {
+            const lowerQ = question.toLowerCase();
+            let kataTugas = "Bagaimanakah / Jelaskan";
+            if (lowerQ.includes("mengapakah")) kataTugas = "Mengapakah (Analisis Sebab & Kepentingan)";
+            else if (lowerQ.includes("sejauh manakah") || lowerQ.includes("wajarkah")) kataTugas = "Sejauh Manakah / Wajarkah (Menilai & Beri Pendirian)";
+            else if (lowerQ.includes("cadangkan")) kataTugas = "Cadangkan (Mencipta Langkah / Idea Baharu)";
+            else if (lowerQ.includes("huraikan manfaat") || lowerQ.includes("kesan")) kataTugas = "Huraikan Manfaat / Kesan (Analisis Impak)";
+            else if (lowerQ.includes("bagaimanakah")) kataTugas = "Bagaimanakah (Mengaplikasi Cara / Langkah)";
+
+            const topicLabel = detectTopicFromText(question, "");
+            const numSets = marks === 4 ? 1 : 3;
+
+            let masterSets = [];
+
+            if (/(?:berita palsu|media sosial|buli siber|siber|penggodaman|hack)/i.test(lowerQ)) {
+                masterSets = [
+                    {
+                        fakta: "Antara langkah utama ialah masyarakat perlulah mengamalkan sikap tabayyun iaitu menyemak kesahihan sesuatu maklumat sebelum mempercayai atau menyebarkannya.",
+                        sebabMarkahFakta: "Menjawab terus kehendak soalan berkaitan tanggungjawab masyarakat beretika dalam menapis maklumat.",
+                        huraian: "Hal ini dikatakan demikian kerana penyebaran maklumat tanpa usul periksa boleh mencetuskan panik, fitnah, serta menggugat keharmonian awam.",
+                        sebabMarkahHuraian: "Menghuraikan sebab ('kerana') mengapa semakan fakta amat penting kepada masyarakat.",
+                        contoh: "Sebagai contoh, pengguna media sosial boleh membuat semakan silang menerusi portal rasmi Sebenarnya.my atau kenyataan rasmi pihak berkuasa.",
+                        sebabMarkahContoh: "Memberikan bukti konkrit medium semakan fakta yang sahih di Malaysia.",
+                        inferens: "Kesannya, penularan berita palsu dapat diputuskan sekali gus memelihara kesejahteraan dan ketenteraman negara.",
+                        fungsiInferens: "Merumuskan impak positif kepada ketenteraman negara (+1M insurans markah)."
+                    },
+                    {
+                        fakta: "Selain itu, pihak berkuasa perlulah memperketat penguatkuasaan undang-undang siber terhadap individu yang sengaja mencipta dan menyebarkan kandungan palsu.",
+                        sebabMarkahFakta: "Mengemukakan isi kedua dari sudut peranan penguatkuasaan undang-undang.",
+                        huraian: "Langkah ini bertujuan untuk memberikan pengajaran serta menimbulkan rasa gerun kepada pengguna internet agar sentiasa mematuhi etika komunikasi.",
+                        sebabMarkahHuraian: "Menjelaskan tujuan tindakan undang-undang diambil secara analitikal.",
+                        contoh: "Misalnya, mengenakan tindakan pendakwaan dan denda di bawah Akta Komunikasi dan Multimedia 1998 oleh SKMM dan PDRM.",
+                        sebabMarkahContoh: "Menamakan akta dan agensi penguatkuasaan yang spesifik dan tepat.",
+                        inferens: "Implikasinya, ruang siber negara akan menjadi lebih selamat, beretika, dan bebas daripada ancaman fitnah.",
+                        fungsiInferens: "Menunjukkan kematangan hujah dengan mengaitkan kesan terhadap keselamatan ruang digital."
+                    },
+                    {
+                        fakta: "Akhir sekali, institusi pendidikan dan keluarga hendaklah mempergiat kempen literasi digital serta pendidikan moral dalam kalangan generasi muda.",
+                        sebabMarkahFakta: "Menyumbang isi ketiga dari sudut pendidikan dan kesedaran jangka panjang.",
+                        huraian: "Hal ini kerana kesedaran dalaman yang kukuh akan membimbing pengguna memanfaatkan teknologi secara bijaksana dan bertanggungjawab.",
+                        sebabMarkahHuraian: "Menerangkan rasional pembentukan jati diri pengguna media sosial.",
+                        contoh: "Contohnya, melaksanakan kempen 'Klik Dengan Bijak' di sekolah, universiti, serta melalui media massa.",
+                        sebabMarkahContoh: "Membekalkan contoh program kesedaran rasmi yang relevan.",
+                        inferens: "Tegasnya, kerjasama erat antara masyarakat dan kerajaan mampu membendung gejala berita palsu hingga ke akar umbi.",
+                        fungsiInferens: "Kesimpulan kecil yang menyimpulkan keseluruhan hujah secara matang."
+                    }
+                ];
+            } else if (/(?:tenaga boleh baharu|tenaga suria|alam sekitar|kitar semula|lestari|pencemaran)/i.test(lowerQ)) {
+                masterSets = [
+                    {
+                        fakta: "Antara manfaat utama penggunaan tenaga boleh baharu seperti tenaga suria ialah dapat mengurangkan pencemaran udara dan pelepasan gas rumah hijau.",
+                        sebabMarkahFakta: "Menjawab terus kehendak soalan dari aspek manfaat kepada kelestarian alam sekitar.",
+                        huraian: "Hal ini dikatakan demikian kerana penjanaan tenaga suria merupakan sumber tenaga bersih yang tidak melibatkan pembakaran bahan api fosil seperti arang batu dan petroleum.",
+                        sebabMarkahHuraian: "Menjelaskan proses saintifik bagaimana tenaga suria mengelakkan pencemaran.",
+                        contoh: "Sebagai contoh, pemasangan panel solar berskala besar dan pada bumbung kediaman dapat mengurangkan pembebasan gas karbon dioksida ke atmosfera.",
+                        sebabMarkahContoh: "Memberikan bukti aplikasi teknologi solar dan jenis gas pencemar yang dikurangkan.",
+                        inferens: "Kesannya, fenomena pemanasan global dan perubahan iklim ekstrem dapat dikawal demi kelestarian ekosistem bumi.",
+                        fungsiInferens: "Merumuskan kesan jangka panjang terhadap keseimbangan alam sekitar (+1M insurans)."
+                    },
+                    {
+                        fakta: "Selain itu, penggunaan tenaga lestari turut memacu pertumbuhan ekonomi hijau serta membuka peluang pekerjaan baharu kepada rakyat.",
+                        sebabMarkahFakta: "Mengemukakan isi kedua yang menjawab aspek manfaat kepada ekonomi negara.",
+                        huraian: "Langkah ini bertujuan untuk menarik pelaburan asing berteknologi tinggi serta membangunkan ekosistem industri tenaga bersih tempatan.",
+                        sebabMarkahHuraian: "Menghuraikan kaitan antara tenaga boleh baharu dengan pelaburan ekonomi negara.",
+                        contoh: "Misalnya, kewujudan peluang kerjaya dalam bidang kejuruteraan solar, penyelenggaraan sistem fotovoltaik, dan penyelidikan teknologi hijau.",
+                        sebabMarkahContoh: "Menyatakan contoh bidang pekerjaan dan industri spesifik yang berkembang.",
+                        inferens: "Implikasinya, pendapatan negara akan meningkat dan Malaysia mampu muncul sebagai hab teknologi hijau utama di rantau ASEAN.",
+                        fungsiInferens: "Menunjukkan impak ekonomi makro yang matang (Aras 4)."
+                    },
+                    {
+                        fakta: "Akhir sekali, tenaga boleh baharu menjamin keselamatan bekalan tenaga negara pada masa hadapan serta menjimatkan kos bil elektrik pengguna.",
+                        sebabMarkahFakta: "Menyumbang isi ketiga berkaitan jaminan sumber tenaga berterusan dan penjimatan kos.",
+                        huraian: "Hal ini kerana sumber cahaya matahari di Malaysia adalah berterusan sepanjang tahun dan tidak akan kehabisan berbanding sumber bahan api fosil yang semakin susut.",
+                        sebabMarkahHuraian: "Memberikan alasan geografi dan kelestarian sumber secara tepat.",
+                        contoh: "Contohnya, pelaksanaan program Pemeteran Tenaga Bersih (NEM) membolehkan pengguna menjana elektrik sendiri dan menjual lebihan tenaga kepada TNB.",
+                        sebabMarkahContoh: "Memberikan contoh dasar/program tenaga sebenar di Malaysia.",
+                        inferens: "Tegasnya, peralihan kepada tenaga boleh baharu amat penting bagi menjamin kemakmuran ekonomi dan kelestarian alam sekitar secara serentak.",
+                        fungsiInferens: "Kesimpulan menyeluruh yang menggabungkan aspek alam sekitar dan ekonomi."
+                    }
+                ];
+            } else if (/(?:perpaduan|kaum|harmoni|toleransi|etnik)/i.test(lowerQ)) {
+                masterSets = [
+                    {
+                        fakta: "Antara langkah berkesan memperkukuh perpaduan kaum ialah melalui pemerkasaan sistem pendidikan kebangsaan yang menyatupadukan semua pelajar.",
+                        sebabMarkahFakta: "Menyatakan langkah teras dari sudut pendidikan awal generasi muda.",
+                        huraian: "Hal ini dikatakan demikian kerana penggunaan bahasa pengantar dan kurikulum yang seragam dapat memupuk persefahaman serta nilai toleransi sejak di bangku sekolah.",
+                        sebabMarkahHuraian: "Menjelaskan bagaimana sistem pendidikan membentuk perpaduan.",
+                        contoh: "Sebagai contoh, penglibatan aktif pelajar pelbagai kaum dalam Rancangan Integrasi Murid Untuk Perpaduan (RIMUP), sukan tahunan, dan aktiviti kokurikulum.",
+                        sebabMarkahContoh: "Mengemukakan contoh program rasmi KPM yang tepat dan konkrit.",
+                        inferens: "Kesannya, semangat muhibah dan kekitaan dapat disemai dengan kukuh dalam jiwa generasi pewaris negara.",
+                        fungsiInferens: "Merumuskan kesan jangka panjang terhadap pembentukan generasi bersatu padu."
+                    },
+                    {
+                        fakta: "Selain itu, masyarakat perlulah membudayakan amalan kunjung-mengunjungi dan penganjuran majlis keraian bersama antara pelbagai kaum.",
+                        sebabMarkahFakta: "Mengemukakan isi kedua dari sudut peranan masyarakat dan sosial.",
+                        huraian: "Tindakan ini bertujuan untuk mengeratkan hubungan silaturahim serta mengenali budaya dan adat resam kaum lain dengan lebih dekat.",
+                        sebabMarkahHuraian: "Menghuraikan tujuan interaksi sosial dalam merapatkan jurang antara kaum.",
+                        contoh: "Misalnya, penganjuran Majlis Rumah Terbuka Malaysia sempena sambutan Hari Raya Aidilfitri, Tahun Baharu Cina, Deepavali, Pesta Kaamatan, dan Hari Gawai.",
+                        sebabMarkahContoh: "Memberikan contoh perayaan dan amalan kemasyarakatan yang spesifik di Malaysia.",
+                        inferens: "Implikasinya, prasangka buruk dapat dihapuskan dan keharmonian masyarakat majmuk akan terus terpelihara.",
+                        fungsiInferens: "Menunjukkan impak keharmonian sosial secara menyeluruh."
+                    },
+                    {
+                        fakta: "Akhir sekali, pihak kerajaan dan media massa hendaklah mempergiat kempen kesedaran perpaduan serta menguatkuasakan undang-undang terhadap isu sensitif.",
+                        sebabMarkahFakta: "Menyumbang isi ketiga dari sudut peranan kerajaan, media, dan perundangan.",
+                        huraian: "Hal ini kerana penyebaran mesej patriotik secara konsisten dan kawalan tegas dapat menghalang anasir ekstremis daripada memecahbelahkan rakyat.",
+                        sebabMarkahHuraian: "Menerangkan rasional gabungan kempen kesedaran dan penguatkuasaan undang-undang.",
+                        contoh: "Contohnya, menyiarkan kempen perpaduan Malaysia MADANI serta mengambil tindakan tegas terhadap pihak yang memainkan isu 3R (Agama, Bangsa, dan Institusi Diraja).",
+                        sebabMarkahContoh: "Membekalkan contoh dasar semasa yang relevan dan tepat.",
+                        inferens: "Tegasnya, perpaduan kaum yang utuh merupakan tunjang utama kestabilan politik dan kemakmuran ekonomi negara.",
+                        fungsiInferens: "Kesimpulan kecil yang mengikat hujah kembali kepada kehendak soalan."
+                    }
+                ];
+            } else {
+                masterSets = [
+                    {
+                        fakta: "Antara langkah utama ialah memperkasakan penghayatan ilmu pengetahuan serta nilai patriotisme dan integriti dalam diri setiap warganegara.",
+                        sebabMarkahFakta: "Menjawab terus kehendak soalan dengan menyatakan tindakan teras dari sudut individu/generasi muda.",
+                        huraian: "Hal ini dikatakan demikian kerana penguasaan ilmu dan jati diri yang kukuh dapat melahirkan masyarakat yang berfikiran matang serta tidak mudah terpengaruh dengan anasir negatif.",
+                        sebabMarkahHuraian: "Menjelaskan sebab ('kerana') dan kesan langsung tindakan fakta pertama secara analitikal.",
+                        contoh: "Sebagai contoh, penglibatan aktif pelajar dan belia dalam program pendidikan sivik, sambutan Bulan Kebangsaan, serta penguasaan bidang sains dan teknologi.",
+                        sebabMarkahContoh: "Memberikan bukti program nyata dan bidang kemahiran spesifik yang boleh dilaksanakan.",
+                        inferens: "Kesannya, kedaulatan dan kestabilan negara dapat dipertahankan daripada sebarang ancaman penjajahan bentuk baharu.",
+                        fungsiInferens: "Merumuskan impak jangka panjang kepada kestabilan negara (berfungsi sebagai insurans +1M)."
+                    },
+                    {
+                        fakta: "Selain itu, pihak kerajaan perlulah memperketat penguatkuasaan undang-undang serta memperkukuh pertahanan dan keselamatan siber negara.",
+                        sebabMarkahFakta: "Mengemukakan isi kedua yang berbeza sudut pandang (peranan pihak berkuasa/kerajaan).",
+                        huraian: "Tindakan ini bertujuan untuk memastikan ketenteraman awam terpelihara dan kedaulatan negara dilindungi daripada sebarang pencerobohan ekonomi mahupun digital.",
+                        sebabMarkahHuraian: "Menghuraikan tujuan ('bertujuan untuk') pelaksanaan dasar dan penguatkuasaan tersebut.",
+                        contoh: "Misalnya, melalui pemantauan tegas oleh agensi keselamatan seperti NACSA, PDRM, dan ATM serta penggubalan dasar keselamatan negara yang mampan.",
+                        sebabMarkahContoh: "Menyatakan instrumen dan agensi konkrit yang bertanggungjawab.",
+                        inferens: "Implikasinya, rakyat akan hidup dalam suasana harmoni, aman, dan saling menghormati prinsip keluhuran perlembagaan.",
+                        fungsiInferens: "Menunjukkan kematangan hujah Aras 4 dengan mengaitkan kesan kepada keharmonian nasional."
+                    },
+                    {
+                        fakta: "Akhir sekali, masyarakat hendaklah memperkukuh perpaduan kaum serta menyokong produk dan ekonomi tempatan secara berterusan.",
+                        sebabMarkahFakta: "Menyumbang isi ketiga (insurans markah 8/8) dari sudut kekuatan sosial dan ekonomi.",
+                        huraian: "Hal ini kerana kerjasama yang utuh dan ekonomi yang berdikari dapat mengelakkan negara daripada bergantung atau ditekan oleh kuasa asing.",
+                        sebabMarkahHuraian: "Menerangkan rasional mengapa kekuatan perpaduan dan ekonomi domestik amat diperlukan.",
+                        contoh: "Contohnya, mengutamakan barangan buatan Malaysia serta mengamalkan semangat muhibah dalam kalangan masyarakat berbilang kaum.",
+                        sebabMarkahContoh: "Membekalkan contoh tindakan praktikal yang boleh dilakukan oleh setiap warganegara.",
+                        inferens: "Tegasnya, sinergi berterusan antara rakyat dan pemimpin akan memacu kemajuan negara ke arah masa depan yang gemilang dan berdaulat.",
+                        fungsiInferens: "Kesimpulan kecil yang menyimpulkan keseluruhan hujah perenggan ketiga."
+                    }
+                ];
+            }
+
+            const selectedSets = masterSets.slice(0, numSets);
+            const perengganPenuh = selectedSets.map((s, i) => {
+                const n = i + 1;
+                return `[F${n} - 1M] ${s.fakta} [H${n} - 1M] ${s.huraian} [C${n} - 1M] ${s.contoh} [I${n} - Sokongan] ${s.inferens}`;
+            }).join("\n\n");
+
+            return {
+                kataTugas,
+                kehendakSoalan: `${topicLabel} (${marks} Markah)`,
+                strategiMenjawab: marks === 4
+                    ? "Soalan 4 Markah memerlukan 1 set hujah lengkap (1F + 1H + 1C + 1I Sokongan). Inferens tidak wajib jika F+H+C sudah mencecah 4 poin, namun disertakan sebagai jaminan markah penuh."
+                    : "Soalan Esei 8 Markah menggunakan strategi Insurans 3 Set (3F + 3H + 3C + 3I Sokongan = 12 poin berpotensi) supaya anda terjamin memperoleh markah penuh 8/8 (Aras 4).",
+                sets: selectedSets,
+                perengganPenuh,
+                mengapaLayakMarkahPenuh: marks === 4
+                    ? "Jawapan ini mempunyai 1 Fakta tepat (+1M), 1 Huraian sebab yang jelas (+1M), 1 Contoh konkrit (+1M), dan ditutup dengan 1 Inferens kesan jangka panjang (+1M) = 4/4 Markah Penuh."
+                    : "Jawapan esei ini mengandungi 3 Fakta berbeza sudut pandang (3M), 3 Huraian analitikal (3M), 3 Contoh spesifik (3M), serta 3 Inferens matang (3M). Jumlah keseluruhan ialah 12 poin bernas yang jauh melepasi syarat maksimum 8/8 Markah Penuh (Holistik Aras 4)."
+            };
+        }
+
+        // 6. Built-in Fallback for Generator (Tab 3)
+        function localGenerateQuestion(subject, bloom, marks, topic) {
+            const stimulus = `Perkembangan semasa menunjukkan bahawa aspek ${topic} memainkan peranan yang amat signifikan dalam menentukan kesejahteraan masyarakat dan kemajuan sesebuah negara pada abad ke-21.`;
+
+            const questionTemplates = {
+                Mengaplikasi: `Sebagai seorang warganegara yang bertanggungjawab, bagaimanakah anda dapat mengaplikasikan nilai dan pengajaran daripada aspek ${topic} dalam kehidupan seharian? [${marks} Markah]`,
+                Menganalisis: `Mengapakah pemerkasaan terhadap aspek ${topic} sangat penting dalam mendepani cabaran globalisasi masa kini? Jelaskan hujah anda. [${marks} Markah]`,
+                Menilai: `"Kejayaan sesebuah negara bergantung sepenuhnya kepada keupayaan rakyat memperkukuh ${topic}." Sejauh manakah anda bersetuju dengan pernyataan tersebut? Berikan alasan anda. [${marks} Markah]`,
+                Mencipta: `Andaikan anda seorang pemimpin muda, cadangkan langkah-langkah strategik dan inovatif untuk memperkasakan ${topic} dalam kalangan generasi hari ini. [${marks} Markah]`
+            };
+
+            const soalan = questionTemplates[bloom] || questionTemplates.Mengaplikasi;
+            const solverData = localSolveKBAT(soalan, subject, marks, "Diri, Masyarakat & Negara");
+
+            return {
+                stimulus,
+                soalan,
+                panduanPemarkahan: marks === 4
+                    ? "Mana-mana kombinasi 4 poin bernas (Fakta + Huraian + Contoh) diterima untuk 4/4 markah penuh. Inferens diterima sebagai poin sokongan/insurans markah."
+                    : "Pemarkahan Esei 8 Markah (Holistik Aras 4: 7-8M): Calon mengemukakan sekurang-kurangnya 2 hingga 3 set isi lengkap (3F + 3H + 3C) berserta contoh tepat dan inferens yang matang.",
+                skemaSets: solverData.sets.map(s => ({
+                    fakta: s.fakta,
+                    huraian: s.huraian,
+                    contoh: s.contoh,
+                    inferensSokongan: s.inferens
+                }))
+            };
+        }
+
+        // ==========================================
+        // UI ACTIONS & HANDLERS
+        // ==========================================
+
+        function fillSampleSolver(type) {
+            const samples = {
+                sejarah4: {
+                    sub: "Sejarah",
+                    marks: 4,
+                    q: "Bagaimanakah generasi muda hari ini dapat mempertahankan kedaulatan negara daripada ancaman penjajahan bentuk baharu? [4 Markah]"
+                },
+                sejarah8: {
+                    sub: "Sejarah",
+                    marks: 8,
+                    q: "Perpaduan kaum merupakan tunjang kestabilan politik dan kemakmuran ekonomi Malaysia. Jelaskan langkah-langkah berkesan untuk memperkukuh perpaduan antara kaum di negara kita. [8 Markah]"
+                },
+                moral: {
+                    sub: "Pendidikan Islam / Moral",
+                    marks: 4,
+                    q: "Penyebaran berita palsu di media sosial semakin berleluasa. Bagaimanakah masyarakat yang beretika dapat membendung gejala ini? [4 Markah]"
+                },
+                sains: {
+                    sub: "Sains / STEM",
+                    marks: 8,
+                    q: "Penggunaan tenaga boleh baharu seperti tenaga suria semakin penting di Malaysia. Huraikan manfaat penggunaan tenaga lestari ini kepada alam sekitar dan ekonomi negara. [8 Markah]"
+                }
+            };
+            const picked = samples[type];
+            document.getElementById('solver-subject').value = picked.sub;
+            document.getElementById('solver-question').value = picked.q;
+            setSolverMarks(picked.marks);
+            showToast(`Contoh soalan ${picked.sub} (${picked.marks} Markah) dimuatkan!`);
+        }
+
+        async function solveKBATWithAI() {
+            const question = document.getElementById('solver-question').value.trim();
+            const subject = document.getElementById('solver-subject').value;
+            const marks = parseInt(document.getElementById('solver-marks').value, 10);
+            const focus = document.getElementById('solver-focus').value;
+
+            if (!question) {
+                showToast("Sila masukkan soalan KBAT terlebih dahulu.", true);
+                return;
+            }
+
+            const btn = document.getElementById('btn-solve');
+            const loading = document.getElementById('solver-loading');
+            const resultBox = document.getElementById('solver-result');
+
+            btn.disabled = true;
+            btn.classList.add('opacity-60');
+            loading.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+
+            const numSets = marks === 4 ? 1 : 3;
+            const systemInstruction = `Anda ialah Ketua Pemeriksa Kertas KBAT SPM & UASA Malaysia bagi subjek ${subject}.
+Sediakan jawapan KBAT berstruktur:
+- Jika 4 Markah: 1 Set Lengkap (1 Fakta + 1 Huraian + 1 Contoh + 1 Inferens Sokongan).
+- Jika 8 Markah: 3 Set Lengkap (3 Fakta + 3 Huraian + 3 Contoh + 3 Inferens Sokongan).
+Pulangkan JSON sah sahaja.`;
+
+            const userPrompt = `Soalan: "${question}"
+Subjek: ${subject}
+Markah: ${marks} Markah (Wajib ${numSets} set isi).
+Fokus: ${focus}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemInstruction }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            kataTugas: { type: "STRING" },
+                            kehendakSoalan: { type: "STRING" },
+                            strategiMenjawab: { type: "STRING" },
+                            sets: {
+                                type: "ARRAY",
+                                items: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        fakta: { type: "STRING" },
+                                        sebabMarkahFakta: { type: "STRING" },
+                                        huraian: { type: "STRING" },
+                                        sebabMarkahHuraian: { type: "STRING" },
+                                        contoh: { type: "STRING" },
+                                        sebabMarkahContoh: { type: "STRING" },
+                                        inferens: { type: "STRING" },
+                                        fungsiInferens: { type: "STRING" }
+                                    },
+                                    propertyOrdering: [
+                                        "fakta", "sebabMarkahFakta",
+                                        "huraian", "sebabMarkahHuraian",
+                                        "contoh", "sebabMarkahContoh",
+                                        "inferens", "fungsiInferens"
+                                    ]
+                                }
+                            },
+                            perengganPenuh: { type: "STRING" },
+                            mengapaLayakMarkahPenuh: { type: "STRING" }
+                        },
+                        propertyOrdering: [
+                            "kataTugas", "kehendakSoalan", "strategiMenjawab",
+                            "sets", "perengganPenuh", "mengapaLayakMarkahPenuh"
+                        ]
+                    }
+                }
+            };
+
+            const data = await callGeminiAPIWithFallback(payload, () => localSolveKBAT(question, subject, marks, focus));
+            renderSolverResults(data, marks);
+            loading.classList.add('hidden');
+            resultBox.classList.remove('hidden');
+            lucide.createIcons();
+            resultBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            btn.disabled = false;
+            btn.classList.remove('opacity-60');
+        }
+
+        function renderSolverResults(data, marks) {
+            document.getElementById('res-kata-tugas').textContent = `Kata Tugas: ${data.kataTugas}`;
+            document.getElementById('res-kehendak').textContent = `Kehendak: ${data.kehendakSoalan}`;
+            document.getElementById('res-strategi').textContent = data.strategiMenjawab;
+            document.getElementById('res-full-essay').textContent = data.perengganPenuh;
+            document.getElementById('res-mengapa-markah-penuh').textContent = data.mengapaLayakMarkahPenuh;
+
+            const container = document.getElementById('fhci-sets-container');
+            container.innerHTML = '';
+
+            (data.sets || []).forEach((set, idx) => {
+                const n = idx + 1;
+                const setHtml = `
+                <div class="glass-card rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-2.5 border-b border-slate-100">
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-indigo-600 text-white font-display font-bold text-xs flex items-center justify-center">${n}</span>
+                            <span class="font-display font-bold text-sm sm:text-base text-slate-900">Set Isi ${n} (F${n} + H${n} + C${n} + I${n} Sokongan)</span>
+                        </div>
+                        <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                            Teras: 3M + Inferens Sokongan (1M)
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                        <div class="bg-blue-50/60 border border-blue-200/80 rounded-xl p-3.5 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-xs font-extrabold uppercase tracking-wider text-blue-900 flex items-center gap-1.5">
+                                        <span class="px-1.5 py-0.5 rounded bg-blue-600 text-white text-[11px]">F${n}</span>
+                                        Fakta / Isi Utama
+                                    </span>
+                                    <span class="text-[11px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded">+1 Markah (Teras)</span>
+                                </div>
+                                <p class="text-sm text-slate-800 leading-relaxed font-medium">${set.fakta}</p>
+                            </div>
+                            <div class="mt-2.5 pt-2 border-t border-blue-200/60 text-[11px] text-blue-800 flex items-start gap-1.5">
+                                <i data-lucide="check" class="w-3.5 h-3.5 shrink-0 mt-0.5 text-blue-600"></i>
+                                <span><strong>Sebab Dapat Markah:</strong> ${set.sebabMarkahFakta}</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-purple-50/60 border border-purple-200/80 rounded-xl p-3.5 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-xs font-extrabold uppercase tracking-wider text-purple-900 flex items-center gap-1.5">
+                                        <span class="px-1.5 py-0.5 rounded bg-purple-600 text-white text-[11px]">H${n}</span>
+                                        Huraian Lanjut
+                                    </span>
+                                    <span class="text-[11px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded">+1 Markah (Teras)</span>
+                                </div>
+                                <p class="text-sm text-slate-800 leading-relaxed font-medium">${set.huraian}</p>
+                            </div>
+                            <div class="mt-2.5 pt-2 border-t border-purple-200/60 text-[11px] text-purple-800 flex items-start gap-1.5">
+                                <i data-lucide="check" class="w-3.5 h-3.5 shrink-0 mt-0.5 text-purple-600"></i>
+                                <span><strong>Sebab Dapat Markah:</strong> ${set.sebabMarkahHuraian}</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-amber-50/60 border border-amber-200/80 rounded-xl p-3.5 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-xs font-extrabold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
+                                        <span class="px-1.5 py-0.5 rounded bg-amber-500 text-white text-[11px]">C${n}</span>
+                                        Contoh Konkrit
+                                    </span>
+                                    <span class="text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">+1 Markah (Teras)</span>
+                                </div>
+                                <p class="text-sm text-slate-800 leading-relaxed font-medium">${set.contoh}</p>
+                            </div>
+                            <div class="mt-2.5 pt-2 border-t border-amber-200/60 text-[11px] text-amber-900 flex items-start gap-1.5">
+                                <i data-lucide="check" class="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-600"></i>
+                                <span><strong>Sebab Dapat Markah:</strong> ${set.sebabMarkahContoh}</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-emerald-50/60 border border-dashed border-emerald-400 rounded-xl p-3.5 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-900 flex items-center gap-1.5">
+                                        <span class="px-1.5 py-0.5 rounded bg-emerald-600 text-white text-[11px]">I${n}</span>
+                                        Inferens (Sokongan / Pilihan)
+                                    </span>
+                                    <span class="text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">Sokongan / +1M Insurans</span>
+                                </div>
+                                <p class="text-sm text-slate-800 leading-relaxed font-medium">${set.inferens}</p>
+                            </div>
+                            <div class="mt-2.5 pt-2 border-t border-emerald-200/60 text-[11px] text-emerald-900 flex items-start gap-1.5">
+                                <i data-lucide="shield-plus" class="w-3.5 h-3.5 shrink-0 mt-0.5 text-emerald-600"></i>
+                                <span><strong>Peranan Sokongan:</strong> ${set.fungsiInferens}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+                container.insertAdjacentHTML('beforeend', setHtml);
+            });
+        }
+
+        function sendToGraderFromSolver() {
+            const q = document.getElementById('solver-question').value;
+            const m = parseInt(document.getElementById('solver-marks').value, 10);
+            document.getElementById('grader-question').value = q;
+            setGraderMarks(m);
+            document.getElementById('grader-answer').value = '';
+            switchTab('grader');
+            showToast("Soalan dipindahkan ke Penyemak. Cuba tulis jawapan anda!");
+        }
+
+        // =========================================================
+        // MOD 2 LOGIC: GRADER (NEVER ERRORS ON ANY DEVICE)
+        // =========================================================
+        function insertDiscourse(phrase) {
+            const el = document.getElementById('grader-answer');
+            const start = el.selectionStart || el.value.length;
+            const end = el.selectionEnd || el.value.length;
+            const current = el.value;
+            const needSpace = start > 0 && !/\s$/.test(current.substring(0, start)) ? " " : "";
+            el.value = current.substring(0, start) + needSpace + phrase + current.substring(end);
+            el.focus();
+        }
+
+        function fillSampleGrader(type) {
+            if (type === 'kesAyatRapat') {
+                setGraderMarks(8);
+                document.getElementById('grader-question').value = "";
+                document.getElementById('grader-answer').value = "Pada pendapat saya,Malaysia menjadi sasaran negara luar dalam ancaman pengodaman atau hack adalah Malaysia menggunakan peralatan digital kerana dapat memudahkan rakyat melalukan pembayaran.Sebagai contoh,QR. Selain itu,Malaysia juga sering mengutuk perbuatan negetif negara luar.Hal ini dikatakan demikian kerana menimbulkan rasa tidak puas hati terhadap negara Malaysia.Sebagai contoh,Malaysia mengutuk perbuatan Israel menyerang Palestina.";
+                showToast("Kes Sebenar Ayat Rapat (8M) dimuatkan! Klik Semak untuk lihat Cadangan Jawapan Penambahbaikan yang selari dengan Punca Penggodaman.");
+            } else if (type === 'tanpaSoalan') {
+                setGraderMarks(4);
+                document.getElementById('grader-question').value = "";
+                document.getElementById('grader-answer').value = "Antara langkah membendung gejala buli siber ialah pihak kerajaan perlu memperketat penguatkuasaan undang-undang komunikasi. Hal ini dikatakan demikian kerana hukuman yang tegas dapat memberi pengajaran dan menakutkan pengguna media sosial daripada meninggalkan komen berbaur kebencian. Sebagai contoh, pesalah boleh dikenakan tindakan di bawah Akta Komunikasi dan Multimedia 1998. Kesannya, keselamatan dan kesejahteraan emosi pengguna internet dapat dipelihara.";
+                showToast("Kotak soalan dikosongkan! Klik butang Semak di bawah untuk lihat hasil bedah siasat.");
+            } else if (type === 'sederhana4m') {
+                setGraderMarks(4);
+                document.getElementById('grader-question').value = "Bagaimanakah amalan kitar semula dapat membantu memelihara kelestarian alam sekitar? [4 Markah]";
+                document.getElementById('grader-answer').value = "Pada pendapat saya, amalan kitar semula dapat mengurangkan sampah sarap di tapak pelupusan. Hal ini kerana barang terpakai diproses semula menjadi bahan baharu. Oleh itu, kita mestilah rajin mengitar semula kerana ia sangat baik untuk semua orang.";
+                showToast("Contoh Jawapan Lemah (4M) dimuatkan (Ada ayat umum/klise yang tiada markah).");
+            } else if (type === 'tanpaInferens4m') {
+                setGraderMarks(4);
+                document.getElementById('grader-question').value = "Bagaimanakah generasi muda dapat memupuk semangat patriotisme dalam diri? [4 Markah]";
+                document.getElementById('grader-answer').value = "Antara langkah utama ialah generasi muda perlulah menghayati sejarah perjuangan tokoh kemerdekaan negara. Hal ini dikatakan demikian kerana pengetahuan sejarah dapat melahirkan rasa syukur atas keamanan yang dikecapi hari ini. Langkah ini juga bertujuan untuk mengelakkan generasi muda daripada terpengaruh dengan anasir luar yang cuba memecahbelahkan perpaduan. Sebagai contoh, pelajar boleh melawat Muzium Negara atau menyertai sambutan Bulan Kebangsaan di sekolah.";
+                showToast("Contoh 4/4 Markah Penuh TANPA Inferens (1F + 2H + 1C) dimuatkan!");
+            } else if (type === 'esei8m') {
+                setGraderMarks(8);
+                document.getElementById('grader-question').value = "Perpaduan kaum merupakan tunjang kestabilan negara. Jelaskan langkah-langkah memperkukuh perpaduan kaum di Malaysia. [8 Markah]";
+                document.getElementById('grader-answer').value = "Antara langkah memperkukuh perpaduan kaum ialah melalui pemerkasaan sistem pendidikan kebangsaan yang menggunakan sukatan pelajaran yang sama. Hal ini bertujuan untuk memupuk persefahaman dan nilai toleransi sejak di bangku sekolah lagi. Sebagai contoh, pelaksanaan aktiviti kokurikulum dan sukan di sekolah melibatkan semua pelajar pelbagai kaum. Selain itu, masyarakat perlulah mengamalkan budaya kunjung-mengunjungi semasa perayaan utama. Tindakan ini dapat mengeratkan hubungan silaturahim antara jiran tetangga. Contohnya, penganjuran Rumah Terbuka Aidilfitri, Tahun Baharu Cina dan Deepavali. Akhir sekali, kerajaan wajar menganjurkan kempen kesedaran perpaduan secara berterusan. Langkah ini dapat menyemai semangat cinta akan tanah air dalam kalangan warganegara. Misalnya, menerusi penyiaran iklan patriotik di televisyen dan media sosial.";
+                showToast("Contoh Esei 8 Markah (3 Set Isi: 3F + 3H + 3C) dimuatkan!");
+            }
+        }
+
+        async function gradeAnswerWithAI() {
+            const question = document.getElementById('grader-question').value.trim();
+            const answer = document.getElementById('grader-answer').value.trim();
+            const maxMarks = parseInt(document.getElementById('grader-marks').value, 10);
+
+            if (!answer) {
+                showToast("Sila masukkan Jawapan Draf Pelajar terlebih dahulu.", true);
+                return;
+            }
+
+            const btn = document.getElementById('btn-grade');
+            const loading = document.getElementById('grader-loading');
+            const resultBox = document.getElementById('grader-result');
+
+            btn.disabled = true;
+            btn.classList.add('opacity-60');
+            loading.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+
+            const hasQuestion = question.length > 0;
+
+            const systemInstruction = `Anda ialah Ketua Pemeriksa Kertas KBAT SPM & UASA Malaysia yang adil.
+PERATURAN PEMARKAHAN FLEKSIBEL:
+1. Jika tiada soalan diberikan, kesan topik secara automatik daripada jawapan pelajar dalam 'konteksDikesanAI'.
+2. Soalan 4 Markah: Setiap elemen bernas (Fakta [F], Huraian [H], Contoh [C], atau Inferens [I]) memberi 1 markah sehingga maksimum 4 markah. INFERENS TIDAK WAJIB jika F+H+C sudah mencukupi 4 markah.
+3. Soalan 8 Markah: Maksimum 8 markah berdasarkan bilangan F, H, C, dan I bernas.
+4. Pecahkan jawapan pelajar AYAT DEMI AYAT dalam 'pecahanAyat' dan berikan penerangan sebab dapat markah (+1M) atau tiada markah (0M).
+5. Dalam 'jawapanPenambahbaikan', pastikan sebarang Inferens atau Set Isi tambahan kekal selari dengan sudut hujah pelajar (jika pelajar menghuraikan PUNCA/FAKTOR, tambah punca/kesan yang sepadan dan jangan bertukar kepada langkah secara tiba-tiba).`;
+
+            const userPrompt = `Semak jawapan pelajar:
+Soalan KBAT: "${hasQuestion ? question : 'TIADA SOALAN DIBERIKAN - Sila kesan topik dan sudut hujah (punca/kesan/langkah) secara automatik daripada jawapan pelajar.'}"
+Skala Markah Penuh: ${maxMarks} Markah
+Jawapan Pelajar: "${answer}"`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemInstruction }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            konteksDikesanAI: { type: "STRING" },
+                            markahDiperoleh: { type: "INTEGER" },
+                            tahapPrestasi: { type: "STRING" },
+                            kiraanFakta: { type: "INTEGER" },
+                            kiraanHuraian: { type: "INTEGER" },
+                            kiraanContoh: { type: "INTEGER" },
+                            kiraanInferens: { type: "INTEGER" },
+                            statusInferensNota: { type: "STRING" },
+                            rumusanSebabMarkah: { type: "STRING" },
+                            pecahanAyat: {
+                                type: "ARRAY",
+                                items: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        petikanAyat: { type: "STRING" },
+                                        kategori: { type: "STRING" },
+                                        markahDiberi: { type: "INTEGER" },
+                                        sebabDapatMarkah: { type: "STRING" }
+                                    },
+                                    propertyOrdering: ["petikanAyat", "kategori", "markahDiberi", "sebabDapatMarkah"]
+                                }
+                            },
+                            ulasanGuru: { type: "STRING" },
+                            jawapanPenambahbaikan: { type: "STRING" }
+                        },
+                        propertyOrdering: [
+                            "konteksDikesanAI", "markahDiperoleh", "tahapPrestasi",
+                            "kiraanFakta", "kiraanHuraian", "kiraanContoh", "kiraanInferens",
+                            "statusInferensNota", "rumusanSebabMarkah",
+                            "pecahanAyat", "ulasanGuru", "jawapanPenambahbaikan"
+                        ]
+                    }
+                }
+            };
+
+            const data = await callGeminiAPIWithFallback(payload, () => localAnalyzeStudentAnswer(question, answer, maxMarks));
+            renderGraderResults(data, maxMarks, hasQuestion);
+            loading.classList.add('hidden');
+            resultBox.classList.remove('hidden');
+            lucide.createIcons();
+            resultBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            showToast("Semakan selesai! Lihat bedah siasat markah di bawah.");
+            btn.disabled = false;
+            btn.classList.remove('opacity-60');
+        }
+
+        function renderGraderResults(data, maxMarks, hasQuestion) {
+            const score = Math.min(Number(data.markahDiperoleh) || 0, maxMarks);
+            document.getElementById('grade-mode-pill').textContent = hasQuestion
+                ? "Konteks Soalan & Topik"
+                : "✨ Konteks/Topik Dikesan (Semakan Tanpa Soalan)";
+            document.getElementById('grade-engine-badge').textContent = data._engine || "Enjin Analisis KBAT";
+            document.getElementById('grade-detected-context').textContent = data.konteksDikesanAI || "Isu Kemasyarakatan & Negara";
+
+            document.getElementById('grade-score-display').textContent = `${score} / ${maxMarks}`;
+            document.getElementById('grade-band-badge').textContent = data.tahapPrestasi || "Disemak";
+
+            document.getElementById('count-f').textContent = data.kiraanFakta ?? 0;
+            document.getElementById('count-h').textContent = data.kiraanHuraian ?? 0;
+            document.getElementById('count-c').textContent = data.kiraanContoh ?? 0;
+            document.getElementById('count-i').textContent = data.kiraanInferens ?? 0;
+
+            document.getElementById('grade-inferens-status').textContent = data.statusInferensNota || "Inferens sebagai sokongan";
+            document.getElementById('grade-overall-reason').textContent = data.rumusanSebabMarkah || "";
+            document.getElementById('grade-feedback').textContent = data.ulasanGuru || "";
+            document.getElementById('grade-improved-answer').textContent = data.jawapanPenambahbaikan || "";
+
+            const breakdownContainer = document.getElementById('grade-sentence-breakdown');
+            breakdownContainer.innerHTML = '';
+
+            (data.pecahanAyat || []).forEach((item, index) => {
+                const hasMark = Number(item.markahDiberi) > 0;
+                const kat = (item.kategori || "").toUpperCase();
+
+                let badgeColor = "bg-slate-200 text-slate-800";
+                let cardBorder = "border-slate-200 bg-slate-50/70";
+                if (kat.includes("FAKTA")) {
+                    badgeColor = "bg-blue-600 text-white";
+                    cardBorder = "border-blue-200 bg-blue-50/40";
+                } else if (kat.includes("HURAIAN")) {
+                    badgeColor = "bg-purple-600 text-white";
+                    cardBorder = "border-purple-200 bg-purple-50/40";
+                } else if (kat.includes("CONTOH")) {
+                    badgeColor = "bg-amber-500 text-white";
+                    cardBorder = "border-amber-200 bg-amber-50/40";
+                } else if (kat.includes("INFERENS")) {
+                    badgeColor = "bg-emerald-600 text-white";
+                    cardBorder = "border-emerald-200 bg-emerald-50/40";
+                } else if (!hasMark) {
+                    badgeColor = "bg-rose-600 text-white";
+                    cardBorder = "border-rose-200 bg-rose-50/40";
+                }
+
+                const html = `
+                <div class="rounded-xl border ${cardBorder} p-3.5 sm:p-4 transition hover:shadow-sm">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-slate-400">Ayat #${index + 1}</span>
+                            <span class="px-2.5 py-0.5 rounded-md text-xs font-extrabold uppercase tracking-wider ${badgeColor}">
+                                ${item.kategori}
+                            </span>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-display font-extrabold ${hasMark ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-rose-100 text-rose-800 border border-rose-300'}">
+                            ${hasMark ? `+${item.markahDiberi} Markah` : '0 Markah (Tiada Kredit)'}
+                        </span>
+                    </div>
+
+                    <blockquote class="text-xs sm:text-sm text-slate-900 font-medium italic bg-white/90 p-3 rounded-lg border border-slate-200/80 mb-2.5">
+                        "${item.petikanAyat}"
+                    </blockquote>
+
+                    <div class="flex items-start gap-2 text-xs sm:text-sm ${hasMark ? 'text-emerald-950' : 'text-rose-950'}">
+                        <i data-lucide="${hasMark ? 'check-circle-2' : 'alert-circle'}" class="w-4 h-4 shrink-0 mt-0.5 ${hasMark ? 'text-emerald-600' : 'text-rose-600'}"></i>
+                        <div>
+                            <strong class="font-semibold">${hasMark ? 'Sebab Dapat Markah:' : 'Sebab Tiada Markah:'}</strong>
+                            <span> ${item.sebabDapatMarkah}</span>
+                        </div>
+                    </div>
+                </div>`;
+                breakdownContainer.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        // =========================================================
+        // MOD 3 LOGIC: QUESTION GENERATOR (4M & 8M)
+        // =========================================================
+        let lastGeneratedQuestion = "";
+        let lastGeneratedMarks = 4;
+
+        async function generateQuestionWithAI() {
+            const subject = document.getElementById('gen-subject').value;
+            const bloom = document.getElementById('gen-bloom').value;
+            const marks = parseInt(document.getElementById('gen-marks').value, 10);
+            const topic = document.getElementById('gen-topic').value.trim() || "Perpaduan Kaum dan Kedaulatan Negara";
+
+            const btn = document.getElementById('btn-generate');
+            const loading = document.getElementById('gen-loading');
+            const resultBox = document.getElementById('gen-result');
+
+            btn.disabled = true;
+            btn.classList.add('opacity-60');
+            loading.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+
+            const numSets = marks === 4 ? 1 : 3;
+            const systemInstruction = `Anda ialah Penggubal Soalan Peperiksaan KBAT SPM & UASA Malaysia. Bina satu item soalan KBAT (${marks} Markah) lengkap dengan Stimulus situasi/petikan, tugasan soalan KBAT, dan Peraturan Pemarkahan Fleksibel (${numSets} set Fakta, Huraian, Contoh, serta Inferens Sokongan/Pilihan).`;
+
+            const userPrompt = `Jana satu soalan KBAT ${marks} markah bagi:
+Subjek: ${subject}
+Topik/Isu: ${topic}
+Aras Taksonomi Bloom: ${bloom}
+Peruntukan Markah: ${marks} Markah (Sediakan ${numSets} set skema jawapan F+H+C+I).`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemInstruction }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            stimulus: { type: "STRING" },
+                            soalan: { type: "STRING" },
+                            panduanPemarkahan: { type: "STRING" },
+                            skemaSets: {
+                                type: "ARRAY",
+                                items: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        fakta: { type: "STRING" },
+                                        huraian: { type: "STRING" },
+                                        contoh: { type: "STRING" },
+                                        inferensSokongan: { type: "STRING" }
+                                    },
+                                    propertyOrdering: ["fakta", "huraian", "contoh", "inferensSokongan"]
+                                }
+                            }
+                        },
+                        propertyOrdering: ["stimulus", "soalan", "panduanPemarkahan", "skemaSets"]
+                    }
+                }
+            };
+
+            const data = await callGeminiAPIWithFallback(payload, () => localGenerateQuestion(subject, bloom, marks, topic));
+            lastGeneratedQuestion = data.soalan;
+            lastGeneratedMarks = marks;
+
+            document.getElementById('gen-res-badge').textContent = `${subject} • Aras ${bloom} • ${marks} Markah`;
+            document.getElementById('gen-res-stimulus').textContent = `"${data.stimulus}"`;
+            document.getElementById('gen-res-question').textContent = data.soalan;
+
+            const skemaHtml = (data.skemaSets || []).map((s, i) => `
+                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                    <div class="font-display font-bold text-xs text-indigo-900 uppercase">Cadangan Set Isi ${i + 1}:</div>
+                    <div class="text-xs sm:text-sm"><strong class="text-blue-700">[F${i + 1} - 1M]:</strong> ${s.fakta}</div>
+                    <div class="text-xs sm:text-sm"><strong class="text-purple-700">[H${i + 1} - 1M]:</strong> ${s.huraian}</div>
+                    <div class="text-xs sm:text-sm"><strong class="text-amber-700">[C${i + 1} - 1M]:</strong> ${s.contoh}</div>
+                    <div class="text-xs sm:text-sm"><strong class="text-emerald-700">[I${i + 1} - Sokongan/Insurans 1M]:</strong> ${s.inferensSokongan}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('gen-res-skema').innerHTML = `
+                <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-950">
+                    <strong>Panduan Pemeriksa:</strong> ${data.panduanPemarkahan}
+                </div>
+                <div class="grid grid-cols-1 gap-3">${skemaHtml}</div>
+            `;
+
+            loading.classList.add('hidden');
+            resultBox.classList.remove('hidden');
+            lucide.createIcons();
+            resultBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            btn.disabled = false;
+            btn.classList.remove('opacity-60');
+        }
+
+        function practiceGeneratedQuestion() {
+            if (!lastGeneratedQuestion) return;
+            document.getElementById('grader-question').value = lastGeneratedQuestion;
+            setGraderMarks(lastGeneratedMarks);
+            document.getElementById('grader-answer').value = "";
+            switchTab('grader');
+            showToast(`Soalan (${lastGeneratedMarks} Markah) dimasukkan ke Penyemak!`);
+        }
+
+        function sendGeneratedToSolver() {
+            if (!lastGeneratedQuestion) return;
+            document.getElementById('solver-question').value = lastGeneratedQuestion;
+            setSolverMarks(lastGeneratedMarks);
+            switchTab('solver');
+            showToast(`Soalan (${lastGeneratedMarks} Markah) dihantar ke Penyelesai!`);
+        }
+    </script>
+</body>
+</html>
